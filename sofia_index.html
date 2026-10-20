@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#45291a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sofía">
+<link rel="manifest" href="manifest_sofia.webmanifest">
+<link rel="icon" href="favicon_sofia.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="icon_sofia-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon_sofia-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon_sofia-180.png">
+<style>:root{color-scheme:light dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Biblioteca de Sofía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: un rótulo de madera con el nombre y las cifras, una barra de búsqueda pegajosa, y debajo o bien la lista de libros con sus portadas, o bien las estanterías dibujadas lomo a lomo, o bien los préstamos. La ficha de cada libro se abre en un panel lateral. */
+:root {
+  --bg: #ece3d2;
+  --paper: #f8f3ea;
+  --paper-2: #e6dcc8;
+  --ink: #2a211a;
+  --ink-2: #6d6052;
+  --line: #d3c6ae;
+  --wood: #5b3b24;
+  --wood-2: #45291a;
+  --wood-edge: #8a5a35;
+  --wood-ink: #f3e7cf;
+  --wood-ink-2: #c9ae86;
+  --accent: #2f5d50;
+  --accent-ink: #ffffff;
+  --accent-soft: #d6e4de;
+  --gold: #a9771f;
+  --gold-soft: #f3e4c0;
+  --bad: #9d3a3a;
+  --bad-soft: #f0d9d5;
+  --ok: #4a7a4f;
+  --ok-soft: #d9e6d7;
+  --display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
+  --body: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+  --shadow: 0 14px 40px rgba(50, 30, 10, .22);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1612; --paper: #261f19; --paper-2: #342a22; --ink: #efe5d4; --ink-2: #b3a391; --line: #4a3c30;
+    --wood: #3a2415; --wood-2: #2a1a0f; --wood-edge: #6f4728; --wood-ink: #f3e7cf; --wood-ink-2: #b89a6e;
+    --accent: #82b8a6; --accent-ink: #10201a; --accent-soft: #233b34; --gold: #d8a84a; --gold-soft: #3e3119;
+    --bad: #df8484; --bad-soft: #3f2424; --ok: #8fc48f; --ok-soft: #24362a; --shadow: 0 14px 40px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1c1612; --paper: #261f19; --paper-2: #342a22; --ink: #efe5d4; --ink-2: #b3a391; --line: #4a3c30;
+  --wood: #3a2415; --wood-2: #2a1a0f; --wood-edge: #6f4728; --wood-ink: #f3e7cf; --wood-ink-2: #b89a6e;
+  --accent: #82b8a6; --accent-ink: #10201a; --accent-soft: #233b34; --gold: #d8a84a; --gold-soft: #3e3119;
+  --bad: #df8484; --bad-soft: #3f2424; --ok: #8fc48f; --ok-soft: #24362a; --shadow: 0 14px 40px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--wood-2); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.sr { position: absolute; left: -9999px; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* Rótulo */
+.sign {
+  background: linear-gradient(180deg, var(--wood) 0%, var(--wood-2) 100%); color: var(--wood-ink);
+  border-bottom: 6px solid var(--wood-edge); box-shadow: inset 0 -1px 0 rgba(255,255,255,.08);
+}
+.sign .gutter { padding-block: 20px 16px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 28px; }
+.brand h1 { font-family: var(--display); font-weight: 600; font-size: 42px; line-height: .95; margin: 0; letter-spacing: .01em; color: var(--wood-ink); }
+.brand h1::after { content: ""; display: block; width: 72px; height: 2px; margin-top: 10px; background: var(--gold); box-shadow: 0 4px 0 var(--gold); }
+.brand p { margin: 12px 0 0; color: var(--wood-ink-2); font-size: 13.5px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 8px; }
+.tile { background: rgba(0,0,0,.22); border: 1px solid rgba(255,230,180,.22); border-radius: 6px; padding: 8px 14px; min-width: 100px; cursor: pointer; text-align: left; color: inherit; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+.tile b { display: block; font-family: var(--display); font-size: 28px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; color: var(--wood-ink); }
+.tile span { font-size: 11.5px; color: var(--wood-ink-2); text-transform: uppercase; letter-spacing: .08em; }
+.tile.gold b { color: var(--gold); }
+.tile[aria-pressed="true"] { border-color: var(--gold); background: rgba(0,0,0,.4); }
+.sign-actions { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.ghost { background: transparent; color: var(--wood-ink); border: 1px solid rgba(255,230,180,.3); border-radius: 6px; padding: 6px 12px; font-size: 14px; }
+.ghost[aria-pressed="true"] { background: var(--wood-ink); color: var(--wood-2); border-color: var(--wood-ink); }
+.menu { position: relative; }
+.menu-list { position: absolute; top: calc(100% + 6px); left: 0; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); min-width: 250px; padding: 6px; z-index: 15; display: flex; flex-direction: column; }
+.menu-list button { background: transparent; border: 0; text-align: left; padding: 8px 10px; border-radius: 6px; }
+.menu-list button:hover { background: var(--paper-2); }
+.menu-list small { display: block; color: var(--ink-2); font-size: 12px; }
+
+/* Barra */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: 0 6px 16px rgba(60,40,20,.08); }
+.bar .gutter { padding-block: 10px 8px; }
+.search-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.search { flex: 1 1 280px; min-width: 0; display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; }
+.search input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 2px 0; font-size: 16px; }
+.search input:focus { outline: none; }
+.search svg { width: 16px; height: 16px; flex: none; color: var(--ink-2); }
+.search kbd { font-size: 11px; color: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-family: var(--body); }
+select { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; max-width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 3px 11px; font-size: 13px; color: var(--ink-2); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip .n { font-variant-numeric: tabular-nums; opacity: .8; margin-left: 4px; }
+.btn { border: 1px solid var(--line); background: var(--paper); border-radius: 6px; padding: 7px 12px; font-weight: 500; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.danger { color: var(--bad); border-color: var(--bad); }
+.btn.small { padding: 4px 9px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: default; }
+
+main .gutter { padding-block: 14px 48px; }
+.notice { background: var(--gold-soft); color: var(--ink); border-radius: 8px; padding: 8px 12px; margin: 0 0 12px; font-size: 13.5px; }
+
+/* Estanterías dibujadas */
+.cabinets { display: flex; flex-direction: column; gap: 18px; margin: 0 0 18px; }
+.cabinet { background: var(--wood); border: 6px solid var(--wood-2); border-radius: 8px; padding: 10px 12px 0; box-shadow: var(--shadow); color: var(--wood-ink); }
+.cabinet h3 { font-family: var(--display); font-weight: 600; font-size: 24px; margin: 0 0 4px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.cabinet h3 small { font-family: var(--body); font-size: 13px; color: var(--wood-ink-2); font-variant-numeric: tabular-nums; }
+.balda { margin-bottom: 4px; }
+.balda-name { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--wood-ink-2); padding: 6px 2px 2px; }
+.balda-name button { background: transparent; border: 0; color: inherit; padding: 0; text-decoration: underline dotted; text-underline-offset: 3px; }
+.balda-name button[aria-pressed="true"] { color: var(--gold); }
+.spines { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 0 1px; padding: 0 4px; }
+.slot { height: 74px; display: flex; align-items: flex-end; border-bottom: 9px solid var(--wood-edge); box-shadow: 0 1px 0 var(--wood-2); }
+.spine { display: block; border: 0; padding: 0; width: 9px; border-radius: 1px 1px 0 0; position: relative; box-shadow: inset -1px 0 0 rgba(0,0,0,.25), inset 1px 0 0 rgba(255,255,255,.18); }
+.spine:hover, .spine:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; z-index: 1; }
+.spine.loan::after { content: ""; position: absolute; top: -6px; left: 50%; width: 6px; height: 10px; margin-left: -3px; background: var(--gold); }
+.spine.ileg { background-image: repeating-linear-gradient(180deg, rgba(0,0,0,.18) 0 3px, transparent 3px 6px) !important; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink-2); margin: 0 0 16px; }
+.legend i { display: inline-block; width: 10px; height: 14px; vertical-align: -2px; margin-right: 5px; border-radius: 1px; }
+
+
+/* Red de libros */
+.net-tools { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--ink-2); margin: 0 0 8px; }
+.net-tools label { display: inline-flex; align-items: center; gap: 5px; }
+.net-wrap { position: relative; border: 6px solid var(--wood-2); border-radius: 8px; background: var(--paper); box-shadow: var(--shadow); overflow: hidden; margin: 0 0 18px; }
+.net-wrap canvas { display: block; width: 100%; height: min(72vh, 760px); cursor: grab; touch-action: none; }
+.net-wrap canvas.drag { cursor: grabbing; }
+.net-tip { position: absolute; pointer-events: none; background: var(--wood-2); color: var(--wood-ink); padding: 6px 9px; border-radius: 6px; font-size: 12.5px; max-width: 260px; box-shadow: var(--shadow); transform: translate(12px, 12px); }
+.net-tip b { display: block; font-family: var(--display); font-size: 15px; font-weight: 600; line-height: 1.15; }
+.net-zoom { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.net-zoom button { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper); font-size: 16px; }
+
+/* Préstamos */
+.loans { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.loan { background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 8px; padding: 10px 14px; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; }
+.loan .t { font-family: var(--display); font-size: 20px; font-weight: 600; }
+.loan .d { color: var(--ink-2); font-size: 13.5px; }
+.loan .act { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 6px; }
+
+/* Lista */
+.list-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--ink-2); font-size: 13.5px; margin: 2px 0 8px; flex-wrap: wrap; }
+.rows { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 8px; }
+.row { display: grid; grid-template-columns: 44px 1fr; gap: 2px 12px; padding: 8px 10px 8px 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; align-items: center; min-width: 0; }
+.row:hover { border-color: var(--gold); }
+.row[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.cover { grid-row: 1 / span 3; width: 44px; height: 66px; border-radius: 2px; background-color: var(--paper-2); background-repeat: no-repeat; box-shadow: 1px 1px 3px rgba(0,0,0,.25); position: relative; overflow: hidden; }
+.cover.ph { display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 700; font-size: 16px; color: rgba(255,255,255,.85); text-shadow: 0 1px 1px rgba(0,0,0,.3); }
+.cover.ph::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: rgba(0,0,0,.2); }
+.row .t { font-family: var(--display); font-weight: 600; font-size: 19px; line-height: 1.15; min-width: 0; }
+.row .t em { font-style: normal; background: var(--gold-soft); border-radius: 3px; padding: 0 2px; }
+.row .t .tomo { color: var(--ink-2); font-size: 13.5px; font-family: var(--body); font-weight: 400; }
+.row .a { color: var(--ink-2); font-size: 13.5px; min-width: 0; line-height: 1.3; }
+.row .meta { display: flex; flex-wrap: wrap; gap: 4px; font-size: 12px; color: var(--ink-2); align-items: center; }
+.tag { display: inline-block; border-radius: 3px; padding: 1px 6px; font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+.tag.cat { background: var(--paper-2); color: var(--ink-2); }
+.tag.loan { background: var(--gold-soft); color: var(--gold); }
+.tag.rev { background: var(--bad-soft); color: var(--bad); }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.tag.new { background: var(--accent-soft); color: var(--accent); }
+.tag.dup { background: var(--paper-2); color: var(--ink-2); border: 1px dashed var(--ink-2); }
+.more { display: block; width: 100%; margin-top: 12px; padding: 10px; border: 1px dashed var(--line); background: transparent; border-radius: 8px; color: var(--ink-2); }
+.empty { padding: 30px 10px; text-align: center; color: var(--ink-2); grid-column: 1 / -1; }
+
+/* Ficha */
+.backdrop { position: fixed; inset: 0; background: rgba(30,18,8,.45); z-index: 20; }
+aside.panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(500px, 100%); background: var(--paper); z-index: 21; box-shadow: var(--shadow);
+  overflow-y: auto; padding-block: calc(14px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-bottom, 0px));
+  padding-left: 20px; padding-right: max(20px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 14px;
+}
+.panel-head { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: start; }
+.panel h2 { font-family: var(--display); font-weight: 600; font-size: 27px; line-height: 1.1; margin: 0; text-wrap: balance; }
+.panel .sub { color: var(--ink-2); margin-top: 4px; font-size: 15px; }
+.close { border: 0; background: var(--paper-2); border-radius: 50%; width: 32px; height: 32px; flex: none; font-size: 18px; line-height: 1; }
+.bigcover { width: 132px; height: 198px; border-radius: 3px; box-shadow: 2px 3px 10px rgba(0,0,0,.35); background: var(--paper-2); overflow: hidden; position: relative; }
+.bigcover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; z-index: 1; }
+.bigcover .cover { width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
+.bigcover .cover.sp { background-size: var(--sprite-w-big) auto; }
+.kv { display: grid; grid-template-columns: 110px 1fr; gap: 5px 10px; font-size: 13.5px; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: var(--paper); }
+.card h3 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); font-weight: 600; }
+.card.loaned { border-color: var(--gold); background: var(--gold-soft); }
+.field { display: flex; flex-direction: column; gap: 3px; font-size: 13px; color: var(--ink-2); }
+.field input, .field select, .field textarea { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; color: var(--ink); width: 100%; }
+.field textarea { min-height: 54px; resize: vertical; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.hist { list-style: none; margin: 0; padding: 0; font-size: 13px; color: var(--ink-2); display: flex; flex-direction: column; gap: 3px; }
+.hint { font-size: 12.5px; color: var(--ink-2); }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--wood-2); color: var(--wood-ink); padding: 8px 14px; border-radius: 8px; font-size: 13.5px; z-index: 30; max-width: 90vw; box-shadow: var(--shadow); }
+details.add { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin: 0 0 12px; background: var(--paper); }
+details.add summary { cursor: pointer; font-weight: 500; }
+details.add .grid2 { margin-top: 8px; }
+.dup-list { font-size: 13px; color: var(--ink-2); }
+@media (max-width: 640px) {
+  .kv { grid-template-columns: 1fr; gap: 2px; }
+  .kv dt { margin-top: 6px; }
+  .grid2 { grid-template-columns: 1fr; }
+  .brand h1 { font-size: 34px; }
+  .tile { min-width: 0; flex: 1 1 28%; padding: 6px 9px; }
+  .tile b { font-size: 22px; }
+  .loan .act { grid-column: 1; grid-row: auto; }
+  .rows { grid-template-columns: 1fr; }
+  .bigcover { width: 96px; height: 144px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  aside.panel { animation: slide .18s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<header class="sign">
+  <div class="gutter">
+    <div class="brand">
+      <h1>Biblioteca de Sofía</h1>
+      <p id="subtitle">Catálogo leído de los vídeos de las estanterías.</p>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="sign-actions">
+      <button class="ghost" id="btnShelves" aria-pressed="false">Ver las estanterías</button>
+      <button class="ghost" id="btnLoans" aria-pressed="false">Préstamos</button>
+      <button class="ghost" id="btnNet" aria-pressed="false">Red de libros</button>
+      <button class="ghost" id="btnRandom">Al azar</button>
+      <div class="menu">
+        <button class="ghost" id="btnExport" aria-haspopup="true" aria-expanded="false">Exportar e importar</button>
+        <div class="menu-list" id="exportMenu" hidden>
+          <button id="exCsv">Descargar CSV de la lista actual<small>Lo que está filtrado ahora, con tus correcciones</small></button>
+          <button id="exAll">Descargar CSV del catálogo completo<small>Todos los libros con estantería, balda y estado</small></button>
+          <button id="exJson">Copia de seguridad de tus datos<small>Préstamos, correcciones y libros añadidos, en JSON</small></button>
+          <button id="imJson">Restaurar una copia de seguridad<small>Lee un JSON exportado desde aquí</small></button>
+          <input type="file" id="imFile" accept="application/json" class="sr">
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="gutter">
+    <div class="search-row">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="sr">Buscar</span>
+        <input id="q" type="search" placeholder="Buscar por título, autor, colección o editorial" autocomplete="off">
+        <kbd>/</kbd>
+      </label>
+      <select id="mueble" aria-label="Estantería"><option value="">Todas las estanterías</option></select>
+      <select id="balda" aria-label="Balda"><option value="">Todas las baldas</option></select>
+      <select id="cat" aria-label="Categoría"><option value="">Todas las categorías</option></select>
+      <select id="orden" aria-label="Orden">
+        <option value="pos">Orden en la estantería</option>
+        <option value="titulo">Por título</option>
+        <option value="autor">Por autor</option>
+      </select>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Estado"></div>
+  </div>
+</div>
+
+<main>
+  <div class="gutter">
+    <div id="notice" class="notice" hidden></div>
+    <section id="shelves" hidden></section>
+    <section id="loansView" hidden></section>
+    <section id="netView" hidden>
+      <div class="net-tools">
+        <span>Cada punto es un libro, agrupado por categoría. Las líneas unen libros del mismo autor o de la misma colección. Rueda para ampliar, arrastra para moverte, pulsa un punto para abrir su ficha.</span>
+        <label><input type="checkbox" id="netAutor" checked> Líneas por autor</label>
+        <label><input type="checkbox" id="netCol" checked> Líneas por colección</label>
+        <label><input type="checkbox" id="netLabels" checked> Nombres de los grupos</label>
+      </div>
+      <div class="net-wrap">
+        <canvas id="net" aria-label="Red de libros"></canvas>
+        <div class="net-zoom"><button id="netIn" aria-label="Ampliar">+</button><button id="netOut" aria-label="Reducir">−</button><button id="netFit" aria-label="Ver todo" title="Ver todo">⌂</button></div>
+        <div class="net-tip" id="netTip" hidden></div>
+      </div>
+    </section>
+    <details class="add" id="addBox">
+      <summary>Añadir un libro a mano</summary>
+      <form id="addForm">
+        <div class="grid2">
+          <label class="field">Título <input id="n_titulo" required></label>
+          <label class="field">Autor <input id="n_autor"></label>
+          <label class="field">Colección <input id="n_col"></label>
+          <label class="field">Tomo <input id="n_tomo"></label>
+          <label class="field">Editorial <input id="n_ed"></label>
+          <label class="field">Categoría <select id="n_cat"></select></label>
+          <label class="field">Estantería <input id="n_mueble" list="muebles"></label>
+          <label class="field">Balda <input id="n_balda"></label>
+        </div>
+        <datalist id="muebles"></datalist>
+        <div class="actions" style="margin-top:8px"><button class="btn primary" type="submit">Guardar libro</button></div>
+      </form>
+    </details>
+    <div class="list-head"><span id="count"></span><span id="shown"></span></div>
+    <ul class="rows" id="rows"></ul>
+    <button class="more" id="more" hidden>Mostrar más</button>
+  </div>
+</main>
+
+<div id="panelHost"></div>
+<div id="toastHost"></div>
+
+<script id="data" type="application/json">{"libros":[["S0001","Escuela de la flauta, volumen 2","","Escuela de la flauta","2","","Varios","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Método de flauta; en la base del lomo pone 'marcial' (¿editorial?)",null,-1],["S0002","ilegible (lomo fino con estampado verde y dorado, sin texto)","","","","","Ilegible","baja","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Entre Escuela de la flauta y Olivia",null,-1],["S0003","Olivia salva el circo","Ian Falconer","Olivia","","","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Editorial no visible en el lomo",null,-1],["S0004","ilegible (lomo blanco grueso sin texto)","","","","","Ilegible","baja","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Podría ser un álbum grande o una carpeta",null,-1],["S0005","La cocina en Ghibli","Thibaud Villanova","","","","Ensayo","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Libro de cocina (recetas de las películas de Ghibli)",null,-1],["S0006","Problemas resueltos de Cálculo en varias variables","I. Uña Juárez, J. San Martín Moreno, V. Tomeo Perucha","","","Thomson","Texto escolar","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Manual universitario",13677493,186],["S0007","Los juguetes de Isabela","Emma Thomson","","","Kókinos","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"",8199509,90],["S0008","Nicolás cocina sin fuego","Alicia Suárez","","","","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"En el lomo: 'Nicolás · Cocina sin fuego' y 'Alicia Suárez'; editorial con logotipo tipo Z no identificada",7333533,68],["S0009","ilegible (lomo rojo fino, solo se leen las letras 'K Y')","","","","","Ilegible","baja","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Entre Nicolás cocina sin fuego y Flotante",null,-1],["S0010","Flotante","David Wiesner","","","Océano Travesía","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Álbum ilustrado",null,-1],["S0011","Brujas y hechizos","Benjamin Lacombe, Sébastien Perez","","","Edelvives","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Así se lee en el lomo (letra gótica, pentagrama); podría ser el volumen de 'Genealogía de una bruja'",15141384,224],["S0012","La pequeña bruja","Sébastien Perez, Benjamin Lacombe","Genealogía de una bruja","","Edelvives","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"",null,-1],["S0013","Leo, el dragón lector","José A. Villota Rocha (il. José Benito)","","","Norma Editorial","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"",7282348,53],["S0014","La memoria del agua","Mathieu Reynès, Valérie Vernay","","","","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",19.4,"Editorial no legible (logotipo de castillo azul en la base)",14056092,200],["S0015","Los tres mosqueteros","Alexandre Dumas; Morvan, Dufranne, Rubén","Los tres mosqueteros (cómic SM)","2","SM","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Adaptación en cómic; número 2 en la base del lomo",8088264,85],["S0016","Frankenstein","Mary Shelley; Marion Mousse","","","SM","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Adaptación en cómic",12356249,158],["S0017","La isla del tesoro","Robert Louis Stevenson; Chauvel, Simon","","","SM","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Adaptación en cómic",12331377,155],["S0018","Los tres mosqueteros","Alexandre Dumas; Morvan, Dufranne, Rubén","Los tres mosqueteros (cómic SM)","1","SM","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Número 1 en la base del lomo",8088264,85],["S0019","Tom Sawyer","Mark Twain","Clásicos a medida","","SM","Novela juvenil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",12043351,150],["S0020","La catedral","César Mallorquí","Gran Angular","202","SM","Novela juvenil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Número 202 en el lomo",5265624,28],["S0021","Solos 1","Fabien Vehlmann, Bruno Gazzotti","Solos","1","Dibbuks","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",null,-1],["S0022","Solos 2","Fabien Vehlmann, Bruno Gazzotti","Solos","2","Dibbuks","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",null,-1],["S0023","Solos 3","Fabien Vehlmann, Bruno Gazzotti","Solos","3","Dibbuks","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",null,-1],["S0024","Solos 4","Fabien Vehlmann, Bruno Gazzotti","Solos","4","Dibbuks","Cómic","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",10502600,131],["S0025","Cuentos macabros","Edgar Allan Poe (il. Benjamin Lacombe)","","","Edelvives","Novela juvenil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Lomo gris con título en rojo",7241456,37],["S0026","Los viajes maravillosos del hada Lilú","E. Houdart","","","Kókinos","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",8223127,94],["S0027","La cama mágica","John Burningham","","","Kókinos","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",13935284,195],["S0028","Los amantes mariposa","Benjamin Lacombe","","","Edelvives","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Álbum ilustrado",7279138,52],["S0029","La princesa de las nieves","Mónica Calvo","","","Edelvives","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Lomo muy fino; el final del título queda oculto, 'de las nie...'",7283416,57],["S0030","Las palabras que se llevó el viento","Paloma Sánchez Ibarzábal","","","Pirueta","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",10838772,141],["S0031","La increíblemente alucinante historia de Marcial, el niño normal","José Fragoso","","","Pirueta","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Editorial deducida por el mismo logotipo de pájaro que el libro anterior",8173050,87],["S0032","Una mamá para Owen","Marion Dane Bauer, John Butler","","","Serres","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",7381478,76],["S0033","Yago, el cocodrilo vegetariano","","","","","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Lomo amarillo con banda roja 'Cuentos...' arriba; autor y editorial no legibles",null,-1],["S0034","Para Elisa, tres lobos y un cerdito feroz","Ignacio García-Valiño, Carles Arbat","","","","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Editorial no visible",null,-1],["S0035","Encantado con el bosque","","Las aventuras de Don Quijote","","Parramón","Infantil","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",10384314,127],["S0036","Las adivinanzas del Rey del Mar","Paloma L. (apellido oculto)","","","Ediciones Buchmann","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"",null,-1],["S0037","ilegible (lomo rojo con logotipo blanco de olas, sin título)","","","","","Ilegible","baja","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Entre Las adivinanzas del Rey del Mar y un lomo negro",null,-1],["S0038","ilegible (lomo negro ancho sin texto)","","","","","Ilegible","baja","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Podría ser una carpeta o un álbum",null,-1],["S0039","Olivia (título no visible, lomo azul con lunares)","Ian Falconer","Olivia","","","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",14.6,"Lomo muy fino; se lee 'O L I V I A' y 'Ian Falconer'",954704,3],["S0040","Olivia (título no visible, lomo verde)","Ian Falconer","Olivia","","","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",14.6,"Lomo muy fino; solo se lee 'Ian Falconer'",954704,3],["S0041","El otoño","Claudia Degliuomini","","","","Infantil","media","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",14.6,"Lomo fino verde claro",null,-1],["S0042","Cocina sana · Remedios naturales","","","","C.I.L. (Club Internacional del Libro)","Ensayo","alta","Estantería de Sofía","1 (la más alta: álbumes ilustrados, cómics y cuadernos)","IMG_3422",16.5,"Un solo volumen con los dos títulos en el lomo",null,-1],["S0043","Tangram","Roger Lee","","","","Varios","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Libro rojo con silueta de un hombre en el lomo; logotipo editorial blanco (forma de pájaro) no identificado. A su izquierda solo hay una caja decorativa verde con forma de casa (no es un libro).",3330165,15],["S0044","La leyenda del hechicero: El aprendiz","Taran Matharu","La leyenda del hechicero","1","Nocturna Ediciones","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Número 1 en lo alto del lomo.",null,-1],["S0045","¡Que las matemáticas te acompañen!","Clara Grima","","","Ariel","Ensayo","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Editorial deducida (no se lee el logotipo con claridad).",10301731,125],["S0046","Fórmulas y tablas de matemática aplicada (2ª edición)","Murray R. Spiegel, John Liu, Lorenzo Abellanas","Schaum","","McGraw-Hill","Texto escolar","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Libro universitario de consulta (serie Schaum).",7322846,67],["S0047","ilegible","","","","","Ilegible","baja","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Libro fino con lomo de tela/papel amarillento muy desgastado, sin texto visible.",null,-1],["S0048","El castillo ambulante","Álvaro López Martín","","","Diábolo Ediciones","Ensayo","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Libro sobre la película de Ghibli (no la novela de Diana Wynne Jones, que está más adelante en la misma balda).",12138918,151],["S0049","Guitarra para Dummies","Mark Phillips, Jon Chappell","Para Dummies","","Para Dummies (CEAC/Planeta)","Varios","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"",12478350,160],["S0050","Reina Roja","Juan Gómez-Jurado","Antonia Scott","1","Ediciones B","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Thriller adulto. Delante de este tramo hay una caja negra plana con ventana de foto (¿estuche de DVD/Blu-ray?) tumbada en la balda; no es un libro, no se cataloga.",9256100,117],["S0051","After","Anna Todd (@imaginator1d)","After","1","Planeta","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Número 1 en círculo en lo alto del lomo.",14418944,218],["S0052","Matemáticas de cine","José María Sorando (JM Sorando)","","","Guadalmazán","Ensayo","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Editorial deducida por el logotipo.",11273645,147],["S0053","Física. Pruebas para preparar el acceso a la Universidad. Evaluación de Bachillerato 2020","","","","Anaya","Texto escolar","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Lomo blanco fino con texto rosa.",null,-1],["S0054","Gambito de dama","Walter Tevis","","","Alfaguara","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Novela adulta.",14060731,203],["S0055","Matemáticas básicas para el acceso a la universidad (3ª edición)","Ángel Manuel Ramos del Olmo, José María Rey Cabezas","","","Pirámide","Texto escolar","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"",10580528,132],["S0056","Las aventuras de Ulises","Rosemary Sutcliff","Cucaña (Vicens Vives)","2","Vicens Vives","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Número 2 en lo alto del lomo azul.",5264605,26],["S0057","Naves negras ante Troya","Rosemary Sutcliff","Cucaña (Vicens Vives)","1","Vicens Vives","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"Número 1 en lo alto del lomo azul.",13950309,197],["S0058","El teatro del cuerpo humano","Maris Wicks","","","Norma Editorial","Cómic","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",0,"",10354085,126],["S0059","La vuelta al mundo en 80 días","Julio Verne (adaptación de Loïc Dauvillier, Aude Soleilhac, Olivier Jouvray)","","","SM","Cómic","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",1,"Novela gráfica, lomo granate.",5010121,25],["S0060","La vuelta al mundo en 80 días (edición ilustrada gran formato)","Julio Verne","","","","Infantil","media","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",3.75,"Libro grande apoyado con la portada hacia fuera (ilustración de una calle con multitud, título en amarillo); no se ve el lomo ni la editorial. Tras él hay una caja de madera con un juego Cayro de ajedrez-damas y un dispensador de cinta, que no se catalogan.",5010121,25],["S0061","Theories of Everything","John D. Barrow","","","Vintage","Ensayo","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",3.75,"En inglés.",4036169,18],["S0062","La sombra de Kat Guinee","","","","","Novela juvenil","media","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",3.75,"Autor no visible en el lomo (fotografía de paisaje).",null,-1],["S0063","Cuentos de terror desde la boca del túnel","Chris Priestley","Cuentos de terror","","SM","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",3.75,"",7306487,64],["S0064","Diario de Greg: La ley de Rodrick","Jeff Kinney","Diario de Greg","2","RBA","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Número de tomo no impreso en el lomo; se deduce del título.",15146801,225],["S0065","Diario de Greg: Días de perros","Jeff Kinney","Diario de Greg","4","Molino","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Tomo deducido del título.",15146801,225],["S0066","Diario de Greg: La cruda realidad","Jeff Kinney","Diario de Greg","5","RBA","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Tomo deducido del título.",15146801,225],["S0067","Diario de Greg: Atrapados en la nieve","Jeff Kinney","Diario de Greg","6","RBA","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Tomo deducido del título.",15146801,225],["S0068","Diario de Greg: Buscando plan...","Jeff Kinney","Diario de Greg","7","RBA","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Tomo deducido del título.",15146801,225],["S0069","Diario de Greg: Mala suerte","Jeff Kinney","Diario de Greg","8","RBA","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Tomo deducido del título.",15146801,225],["S0070","Diario de Greg: Un pringao total","Jeff Kinney","Diario de Greg","1","RBA","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Lomo rojo a cuadros; tomo deducido del título (lectura ligeramente movida).",15146801,225],["S0071","La caída","Amanda Hocking","Tierra de magia","2","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Número 2 en la base del lomo.",13550401,182],["S0072","El viaje","Amanda Hocking","Tierra de magia","1","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Número 1 en la base del lomo.",13550367,178],["S0073","Bajo la misma estrella","John Green","","","Nube de Tinta","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"",14853661,222],["S0074","The Complete Poems","Emily Dickinson","","","Faber & Faber","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",4.75,"Poesía en inglés, tapa lila sin sobrecubierta.",11345131,148],["S0075","Soy el número cuatro","Pittacus Lore","Legados de Lorien","1","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"",11152364,145],["S0076","Cuatro","Veronica Roth","Divergente (historias complementarias)","","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Intercalado entre los Legados de Lorien.",null,-1],["S0077","La caída de cinco","Pittacus Lore","Legados de Lorien","4","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"",8186962,88],["S0078","El poder de seis","Pittacus Lore","Legados de Lorien","2","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"",3325079,8],["S0079","La venganza de siete","Pittacus Lore","Legados de Lorien","5","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"",8186963,89],["S0080","Ola de calor","Richard Castle","Nikki Heat","1","Suma de Letras","Varios","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Lomo negro; solo se lee 'OLA DE CA…' pero la portada en miniatura y el autor lo confirman.",10657544,136],["S0081","Los nombres del fuego","Fernando J. López","","","Loqueleo","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"",10486628,129],["S0082","El castillo ambulante","Diana Wynne Jones","","","Berenice","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Editorial deducida por el logotipo del gato.",12138918,151],["S0083","Lucky Starr 1","Isaac Asimov","Lucky Starr","1","","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Ciencia ficción juvenil; logotipo de triángulos rosas no identificado.",13919382,193],["S0084","ilegible (Richard Castle)","Richard Castle","","","","Ilegible","baja","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Lomo negro con miniatura de portada; el título queda tapado por una funda/sobrecubierta y solo se lee '…AUME…'. Probablemente otra novela de Nikki Heat.",null,-1],["S0085","Calor desnudo","Richard Castle","Nikki Heat","2","Suma de Letras","Varios","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Número de colección 1093/2 en la base.",7506650,81],["S0086","Gregor: Las tierras bajas","Suzanne Collins","Gregor (Crónicas de las Tierras Bajas)","1","Molino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Número 1 en recuadro.",8345963,104],["S0087","Macbeth","William Shakespeare","Penguin Clásicos","","Penguin Clásicos","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"",872432,2],["S0088","Jane Eyre","Charlotte Brontë","Oxford Bookworms","6","Oxford","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Lectura graduada en inglés, nivel 6 (número en la base del lomo verde).",8235363,96],["S0089","Don Juan Tenorio","José Zorrilla","Letras Hispánicas","114","Cátedra","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Número 114 en lo alto del lomo.",4155935,19],["S0090","Pepita Jiménez","Juan Valera","Letras Hispánicas","290","Cátedra","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Número 290 en lo alto del lomo.",3328480,14],["S0091","Heartstopper. Volumen 1","Alice Oseman","Heartstopper","1","Crossbooks","Cómic","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"",null,-1],["S0092","El ajedrez. Aprender y progresar","","","","","Varios","media","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",6.25,"Lomo rosa; autor no visible, logotipo editorial en forma de X/aspa.",null,-1],["S0093","Reencuentro","Fred Uhlman","Fábula","021/1","Tusquets","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"",12737302,164],["S0094","Kokopelli's Flute","Will Hobbs","","","Aladdin","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"En inglés.",6627317,32],["S0095","Fisi Ka y el fantasma Electrón","Blandine Pluchet","","","","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"Logotipo editorial (sol) no identificado.",null,-1],["S0096","Lazarillo de Tormes","Anónimo","Austral","12","Austral","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"Número 12 en lo alto del lomo.",3359629,17],["S0097","Una llama entre cenizas","Sabaa Tahir","Una llama entre cenizas","1","Montena","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"",7367610,73],["S0098","La cabina mágica","Norton Juster","","","Ático de los Libros","Infantil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"Editorial deducida por el logotipo (A con tejado).",null,-1],["S0099","Rebeldes","Susan E. Hinton","","","Loqueleo","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"",13029122,168],["S0100","Lazarillo de Tormes","Anónimo","Letras Hispánicas","44","Cátedra","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"Segundo ejemplar del Lazarillo, en Cátedra (número 44).",3359629,17],["S0101","Buenos presagios","Terry Pratchett, Neil Gaiman","","","Minotauro","Literatura","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"",10641207,134],["S0102","El legado de Olkrann 2","Daniel Hernández Chambers","El legado de Olkrann","2","B de Blok","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",8.25,"Subtítulo del tomo no visible; número 2 dentro del dragón del lomo.",null,-1],["S0103","Cazadores de sombras 1: Ciudad de hueso","Cassandra Clare","Cazadores de sombras","1","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",10.0,"Número grande en la parte alta del lomo; subtítulo leído en el lomo (tomo 5 muy claro, los otros con algo de desenfoque)",14157069,205],["S0104","Cazadores de sombras 2: Ciudad de ceniza","Cassandra Clare","Cazadores de sombras","2","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",10.0,"Número grande en la parte alta del lomo; subtítulo leído en el lomo (tomo 5 muy claro, los otros con algo de desenfoque)",8200334,91],["S0105","Cazadores de sombras 3: Ciudad de cristal","Cassandra Clare","Cazadores de sombras","3","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",10.0,"Número grande en la parte alta del lomo; subtítulo leído en el lomo (tomo 5 muy claro, los otros con algo de desenfoque)",12341021,157],["S0106","Cazadores de sombras 4: Ciudad de los ángeles caídos","Cassandra Clare","Cazadores de sombras","4","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",10.0,"Número grande en la parte alta del lomo; subtítulo leído en el lomo (tomo 5 muy claro, los otros con algo de desenfoque)",8030343,83],["S0107","Cazadores de sombras 5: Ciudad de las almas perdidas","Cassandra Clare","Cazadores de sombras","5","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",10.0,"Número grande en la parte alta del lomo; subtítulo leído en el lomo (tomo 5 muy claro, los otros con algo de desenfoque)",13477738,174],["S0108","Vampire Academy","Richelle Mead","Vampire Academy","1","Alfaguara","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Sin número en el lomo; tomo 1 deducido por el título",8661553,109],["S0109","La trastienda Batibaleno","P. D. Baccalario","La tienda Batibaleno","1","Montena","Novela juvenil","media","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"En el lomo: 'La trastienda Batibaleno', número 1 en círculo arriba; el título exacto podría ser 'La tienda Batibaleno'",13609602,183],["S0110","Detective Esqueleto: Jugando con fuego","Derek Landy","Detective Esqueleto (Skulduggery Pleasant)","2","SM","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Logotipo S2P en el lomo",7421604,79],["S0111","Contar de 7 en 7","Holly Goldberg Sloan","","","Gran Travesía","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"",12435498,159],["S0112","El misterio de los estudios Kellerman","Ken Follett","","","Montena","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"",13609954,184],["S0113","Leal","Veronica Roth","Divergente","3","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"",null,-1],["S0114","Insurgente","Veronica Roth","Divergente","2","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Lleva un marcapáginas rojo",null,-1],["S0115","Divergente","Veronica Roth","Divergente","1","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"",14636359,221],["S0116","El trío de la Dama Negra","Irene Adler","Sherlock, Lupin y yo","1","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Número 1 en el lomo; autor completado por conocimiento de la serie",7274303,45],["S0117","Relato de un náufrago","Gabriel García Márquez","Aula de Literatura (Vicens Vives)","","Vicens Vives","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Lomo morado con número de colección arriba (ilegible, parece 61)",9486827,119],["S0118","Rinconete y Cortadillo y otras novelas ejemplares","Miguel de Cervantes","Clásicos adaptados (Vicens Vives)","","Vicens Vives","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Lomo rojo, número de colección arriba (parece 15)",7367838,74],["S0119","Eternidad","Alyson Noël","Los inmortales","1","Montena","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Serie deducida por conocimiento",11382741,149],["S0120","Sirenas","Amanda Hocking","Watersong","1","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Número 1 en el lomo; en el lomo se lee el nombre de la serie, parece 'Canciones del mar'",13550391,180],["S0121","Encanto","Amanda Hocking","Watersong","2","Destino","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Número 2 en el lomo",13550389,179],["S0122","Sherlock Holmes: Relatos I","Arthur Conan Doyle","Penguin Clásicos","1","Penguin Clásicos","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"",6717853,34],["S0123","El ascenso de nueve","Pittacus Lore","Legados de Lorien","3","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",12.4,"Tomo deducido por conocimiento de la serie",null,-1],["S0124","Donde los árboles cantan","Laura Gallego","","","SM","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",13.25,"Lomo oscuro con imagen de bosque",7253350,39],["S0125","Olvidados","Michael Grant","Olvidados (Gone)","1","RBA","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",13.25,"",null,-1],["S0126","ilegible (lomo rojo liso, fino, sin texto visible)","","","","","Ilegible","baja","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",13.25,"Entre Olvidados y Alas de fuego; podría ser un libro con sobrecubierta roja o un cuaderno",null,-1],["S0127","Alas de fuego","Laura Gallego García","Alas de fuego","1","Laberinto","Novela juvenil","alta","Estantería de Sofía","2 (novela juvenil: Diario de Greg, Cazadores de sombras, Divergente)","IMG_3422",13.25,"Último libro de la balda por la derecha",10671861,137],["S0128","Ejercicios de Lengua. Bachillerato","","Chuletas","","Espasa","Texto escolar","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",14185241,207],["S0129","Ejercicios de Química. Bachillerato","","Chuletas","","Espasa","Texto escolar","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",14185255,209],["S0130","Ejercicios de Física. Bachillerato","","Chuletas","","Espasa","Texto escolar","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",14185261,211],["S0131","Química fácil. Bachillerato","","Chuletas","","Espasa","Texto escolar","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"encuadernación en espiral",14185260,210],["S0132","Lengua fácil. Bachillerato","","Chuletas","","Espasa","Texto escolar","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",14185249,208],["S0133","Matemáticas fáciles. Bachillerato","","Chuletas","","Espasa","Texto escolar","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",14185275,213],["S0134","Física fácil. Bachillerato","","Chuletas","","Espasa","Texto escolar","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",14185269,212],["S0135","Comentario de texto fácil. Bachillerato","","Chuletas","","Espasa","Texto escolar","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",14185218,206],["S0136","Harry Potter y las Reliquias de la Muerte","J. K. Rowling","Harry Potter","7","Salamandra","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",13753176,191],["S0137","Harry Potter y el misterio del príncipe","J. K. Rowling","Harry Potter","6","Salamandra","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",9393000,118],["S0138","Harry Potter y la Orden del Fénix","J. K. Rowling","Harry Potter","5","Salamandra","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",null,-1],["S0139","Harry Potter y el prisionero de Azkaban","J. K. Rowling","Harry Potter","3","Salamandra","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",14631819,220],["S0140","Harry Potter y la piedra filosofal","J. K. Rowling","Harry Potter","1","Salamandra","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",10.25,"",13966854,198],["S0141","Harry Potter and the Deathly Hallows","J. K. Rowling","Harry Potter","7","Bloomsbury","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",8.0,"edición en inglés",15158660,226],["S0142","Harry Potter and the Half-Blood Prince","J. K. Rowling","Harry Potter","6","Bloomsbury","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",8.0,"edición en inglés",10716273,138],["S0143","Harry Potter and the Order of the Phoenix","J. K. Rowling","Harry Potter","5","Bloomsbury","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",8.0,"edición en inglés",15158666,227],["S0144","Pippi Calzaslargas","Astrid Lindgren","","","","Infantil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",13755252,192],["S0145","El abrazo del Nilo","Montserrat del Amo","","","Bruño","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",3325368,9],["S0146","Ética para Amador","Fernando Savater","","","Ariel","Ensayo","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",10450866,128],["S0147","Demian","Hermann Hesse","","","","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",12569297,163],["S0148","Háblame del fantasma del faro","Tina Blanco","","","Edelvives","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",7263360,40],["S0149","¡Amigas al rescate!","","Trío Beta","3","Montena","Infantil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",7272200,43],["S0150","El galáctico, pirático y alienígena viaje de mi padre","Neil Gaiman","","","","Infantil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",null,-1],["S0151","Rebelión de verano","Vera y Bill Cleaver","","","Alfaguara","Novela juvenil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"lomo naranja con nº 76 arriba; editorial deducida por el diseño",null,-1],["S0152","El tren de los monstruos","Ignasi Valios i Buñuel","","","","Infantil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",7290734,62],["S0153","Pomelo se pregunta","Ramona Bădescu, Benjamin Chaud","Pomelo","","Kókinos","Infantil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",8259818,103],["S0154","Pomelo viaja","Ramona Bădescu, Benjamin Chaud","Pomelo","","Kókinos","Infantil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",7293121,63],["S0155","La pirámide roja","Rick Riordan","Las crónicas de Kane","1","Montena","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",12331348,154],["S0156","Crescendo","Becca Fitzpatrick","Hush, Hush","2","B de Blok","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",6671379,33],["S0157","Multiverso","Leonardo Patrignani","","","B de Blok","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",null,-1],["S0158","The Foxes","","","","","Novela juvenil","baja","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"lomo crema hundido entre Multiverso y Mil veces hasta siempre; solo se lee el título",null,-1],["S0159","Mil veces hasta siempre","John Green","","","Nube de Tinta","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",8239571,100],["S0160","Fuego y espinas","Victoria Vílchez","","","","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.5,"",7432449,80],["S0161","Seraphina","Rachel Hartman","Seraphina","1","Nocturna","Novela juvenil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"lomo granate con dragón dorado y nº 1; solo se lee '...HINA' del título, logo de gato (Nocturna)",7101911,36],["S0162","No te lo tomes al pie de la letra","Miguel Ángel Mendo","","","","Infantil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"lomo naranja, texto pequeño; lectura del título con cierta duda",8225471,95],["S0163","El Valle de los Lobos","Laura Gallego García","Crónicas de la Torre","I","SM","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"",9005789,114],["S0164","Memorias de Idhún. La Resistencia: Búsqueda","Laura Gallego García","Memorias de Idhún","I","SM","Novela juvenil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"lomo morado hundido detrás de Crónicas de la Torre; se lee 'Memorias de Idhún' y 'I Búsqueda'",13285475,173],["S0165","ilegible (lomo fino azul/blanco hundido)","","","","","Ilegible","baja","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"entre Memorias de Idhún y La rosa de San Jorge",null,-1],["S0166","La rosa de San Jorge","","El Barco de Vapor","169","SM","Infantil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"autor en el lomo parece 'Iris Senell' (dudoso)",7369879,75],["S0167","El lazo rojo","Mira Lobe","El Barco de Vapor","185","SM","Infantil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"",14254312,214],["S0168","El cerdito Lolo","Eveline Hasler","El Barco de Vapor","71","SM","Infantil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"",8350980,105],["S0169","La conquista de la felicidad","Bertrand Russell","","","Austral","Ensayo","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"",2272085,7],["S0170","Flora the Fancy Dress Fairy","Daisy Meadows","Rainbow Magic / Early Reader","","Orchard","Infantil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",6.75,"librito fino en inglés, etiqueta 'Early Reader'",8782974,111],["S0171","Cuarto viaje al Reino de la Fantasía","Geronimo Stilton","El Reino de la Fantasía","4","Destino","Infantil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",5.5,"",7357595,72],["S0172","Despierta","Beth Revis","Across the Universe","1","SM","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",5.5,"",15159044,228],["S0173","La rosa de los vientos (antología poética)","Selección de Juan Ramón Torregrosa","","","Vicens Vives","Varios","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",5.5,"lomo morado",2270013,6],["S0174","El sobrino del mago","C. S. Lewis","Las Crónicas de Narnia","1","Destino","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",5.5,"",13165702,171],["S0175","La puerta del tiempo","Pierdomenico Baccalario","Ulysses Moore","1","Montena","Novela juvenil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",5.5,"lomo ilustrado con nº 1 y logo M; autor completado por conocimiento de la serie",13125298,170],["S0176","Aristóteles y Dante descubren los secretos del universo","Benjamin Alire Sáenz","","","","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",4.75,"",12327052,152],["S0177","Un caso para ti y el Equipo Tigre: En el templo del trueno","Thomas Brezina","Equipo Tigre","","SM","Infantil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",4.75,"lomo azul fino hundido; el título se lee 'En el templo de...' con duda",8353632,106],["S0178","ilegible (libro colocado con la contracubierta naranja hacia fuera)","","","","","Ilegible","baja","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",4.75,"se ve contracubierta naranja (atardecer) con texto y código de barras; lomo no visible",null,-1],["S0179","Los dioses también aman","Celopan","","","Martínez Roca","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",4.75,"",7386190,77],["S0180","El prisionero de Zenda","Anthony Hope","El País Aventuras","41","El País","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",4.75,"",13527606,176],["S0181","Memorias de Idhún. La Resistencia: Revelación","Laura Gallego García","Memorias de Idhún","II","SM","Novela juvenil","media","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",2.25,"lomo verde oscuro hundido entre El prisionero de Zenda y Mark Manson; se lee 'Memorias de Idhún' y 'II Revelación'",13285475,173],["S0182","El sutil arte de que (casi todo) te importe una mierda","Mark Manson","","","HarperCollins","Ensayo","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",2.25,"",null,-1],["S0183","Scion of Ikshvaku","Amish","Ram Chandra","1","Westland","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",2.25,"en inglés",15216694,229],["S0184","ilegible (lomo negro con texto rojo arriba, hundido)","","","","","Ilegible","baja","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",2.25,"entre Scion of Ikshvaku y 1984; muy metido hacia atrás",null,-1],["S0185","1984","George Orwell","","","Debolsillo","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",2.25,"",8745958,110],["S0186","Mil lugares donde encontrarte","Claudia Gray","","","Montena","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",1.0,"",13114825,169],["S0187","Howl's Moving Castle","Diana Wynne Jones","","","HarperCollins","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",1.0,"en inglés",8783945,112],["S0188","La ascensión","Amanda Hocking","Tierra de magia","3","Destino","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",1.0,"",13550394,181],["S0189","Music by the Numbers","Eli Maor","","","Princeton University Press","Ensayo","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",1.0,"",8835541,113],["S0190","Reminders of Him","Colleen Hoover","","","Montlake","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",1.0,"en inglés",12504366,162],["S0191","Las cuatro estaciones. Invitación a la poesía","Edición de Antón, Otero y Torregrosa","Aula de Literatura","29","Vicens Vives","Varios","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",3326517,12],["S0192","El sabueso de los Baskerville","Arthur Conan Doyle","Aula de Literatura","13","Vicens Vives","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",14279159,215],["S0193","El niño con el pijama de rayas","John Boyne","","","Salamandra","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",null,-1],["S0194","Tan cerca","Beth Revis","Across the Universe","2","SM","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",null,-1],["S0195","Cartas a una joven matemática","Ian Stewart","","","Booket","Ensayo","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",15114334,223],["S0196","the sun and her flowers","rupi kaur","","","Simon & Schuster","Literatura","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"poesía, en inglés",8084615,84],["S0197","Las crónicas de Wildwood","Colin Meloy, Carson Ellis","Wildwood","1","Alfaguara","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",7290243,61],["S0198","Gödel, Escher, Bach","Douglas R. Hofstadter","","","Booket","Ensayo","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",14368453,217],["S0199","La reina roja","Victoria Aveyard","La reina roja","1","Gran Travesía","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",4923789,23],["S0200","Dos soles","Beth Revis","Across the Universe","3","SM","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",null,-1],["S0201","Cocina para estudiantes","David Suriol Puigvert","","","","Ensayo","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",13933328,194],["S0202","Hush, Hush","Becca Fitzpatrick","Hush, Hush","1","Ediciones B","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"",14419299,219],["S0203","Viajes al otro mundo","H. P. Lovecraft","","","","Novela juvenil","alta","Estantería de Sofía","3 (Harry Potter, Narnia y libros de texto)","IMG_3423",0.25,"lomo amarillo con etiqueta 'BT 8162'; último libro del extremo derecho de la balda",8169604,86],["S0204","El mundo de Sofía","Jostein Gaarder","Las Tres Edades","35","Siruela","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"a su izquierda hay un disco de vinilo y un peluche verde, no libros",1048142,4],["S0205","ilegible (lomo negro con estrellas, texto blanco 'EL...', hundido)","","","","","Ilegible","baja","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"entre El mundo de Sofía y Tras las llamas",null,-1],["S0206","Tras las llamas","Will Hill","","","","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",10866963,144],["S0207","The Science of Music","Andrew May","Hot Science","","Icon Books","Ensayo","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"en inglés; editorial deducida por el diseño",10183258,123],["S0208","Don Quijote de la Mancha","Miguel de Cervantes","Edición RAE","","Santillana","Literatura","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",13478610,175],["S0209","After","Anna Todd","After","1","Planeta","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",14418944,218],["S0210","El legado de Olkrann","Daniel Hernández Chambers","El legado de Olkrann","1","Ediciones B","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",13937381,196],["S0211","El legado de Olkrann","Daniel Hernández Chambers","El legado de Olkrann","3","Ediciones B","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",13937381,196],["S0212","Relatos de vampiros","VV. AA.","Tus Libros Selección","","Anaya","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",12963384,166],["S0213","The Witch","","lecturas en inglés Algar (monstruos)","1","Algar","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"seis librillos finos en inglés de Algar, lomo beige",null,-1],["S0214","The Bogeyman","","lecturas en inglés Algar (monstruos)","3","Algar","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",null,-1],["S0215","The Zombie","","lecturas en inglés Algar (monstruos)","4","Algar","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",null,-1],["S0216","The Mummy","","lecturas en inglés Algar (monstruos)","6","Algar","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",null,-1],["S0217","The Monster in the Closet","","lecturas en inglés Algar (monstruos)","9","Algar","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"número de tomo 9 u 8, poco nítido",10830632,140],["S0218","The Vampire","","lecturas en inglés Algar (monstruos)","2","Algar","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",null,-1],["S0219","Pinocho","Carlo Collodi","Cucaña","45","Vicens Vives","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",5002411,24],["S0220","Juego de luces","Hervé Tullet","","","Kókinos","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",10863249,143],["S0221","Robo en las cataratas del Niágara","Sir Steve Stevenson","Agatha Mistery","4","La Galera","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",11.25,"",7354003,71],["S0222","Bat Pat: La abuela de Tutankamón","Roberto Pavanello","Bat Pat","3","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.0,"Visible en el borde izquierdo a 14,0 s (solape con la parte A). Lomo negro con letras amarillas; orden físico real de los tomos: 3,4,5,6,1,2,7",13706731,190],["S0223","Bat Pat: El pirata Dientedeoro","Roberto Pavanello","Bat Pat","4","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.0,"Visible en el borde izquierdo a 14,0 s (solape con la parte A). Lomo negro con letras amarillas; orden físico real de los tomos: 3,4,5,6,1,2,7",13706731,190],["S0224","Bat Pat: El monstruo de las cloacas","Roberto Pavanello","Bat Pat","5","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.0,"Visible en el borde izquierdo a 14,0 s (solape con la parte A). Lomo negro con letras amarillas; orden físico real de los tomos: 3,4,5,6,1,2,7",13706731,190],["S0225","Bat Pat: El vampiro bailarín","Roberto Pavanello","Bat Pat","6","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.0,"Visible en el borde izquierdo a 14,0 s (solape con la parte A). Lomo negro con letras amarillas; orden físico real de los tomos: 3,4,5,6,1,2,7",13706731,190],["S0226","Bat Pat: El tesoro del cementerio","Roberto Pavanello","Bat Pat","1","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.0,"Visible en el borde izquierdo a 14,0 s (solape con la parte A). Lomo negro con letras amarillas; orden físico real de los tomos: 3,4,5,6,1,2,7",13706731,190],["S0227","Bat Pat: Brujas a medianoche","Roberto Pavanello","Bat Pat","2","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.0,"Visible en el borde izquierdo a 14,0 s (solape con la parte A). Lomo negro con letras amarillas; orden físico real de los tomos: 3,4,5,6,1,2,7",13706731,190],["S0228","Bat Pat: El mamut friolero","Roberto Pavanello","Bat Pat","7","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.0,"Visible en el borde izquierdo a 14,0 s (solape con la parte A). Lomo negro con letras amarillas; orden físico real de los tomos: 3,4,5,6,1,2,7",13706731,190],["S0229","Princesa de los Hielos","Tea Stilton","Princesas del Reino de la Fantasía","1","Destino","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.9,"Lomo azul claro con badge '1'",7272408,44],["S0230","Los Cinco y el tesoro de la isla","Enid Blyton","Los Cinco","1","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.9,"Lomo blanco; nº 1 abajo",7397920,78],["S0231","Una bruja en casa","","","","","Infantil","baja","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.9,"Lomo naranja fino, logo cuadrado arriba; tras el título hay otra línea ilegible (¿autor?). Lectura del título probable",10649691,135],["S0232","Scooby-Doo! La venganza del corsario azul y otras historias","","Scooby-Doo","","Laberinto","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",14.9,"Lomo amarillo",7279041,51],["S0233","Los Cinco se escapan","Enid Blyton","Los Cinco","3","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"",8239417,99],["S0234","Regreso al Reino de la Fantasía","Geronimo Stilton","Geronimo Stilton (Reino de la Fantasía)","","Destino","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Tomo grueso azul con pegatina de biblioteca en el lomo",7320830,66],["S0235","... en el Reino de la Fantasía","Geronimo Stilton","Geronimo Stilton (Reino de la Fantasía)","","Destino","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Tomo grueso, cabecera roja y parte inferior turquesa/naranja; se lee 'Geronimo Stilton' y '... EN EL REINO DE LA FANTASÍA', primera palabra del título ilegible por movimiento",7894149,82],["S0236","Otra aventura de los Cinco","Enid Blyton","Los Cinco","2","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Lomo blanco con cabecera amarilla y número",8239413,98],["S0237","Los Cinco frente a la aventura","Enid Blyton","Los Cinco","9","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Lomo blanco con cabecera amarilla y número",null,-1],["S0238","Los Cinco en el páramo misterioso","Enid Blyton","Los Cinco","12","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Lomo blanco con cabecera amarilla y número",8258758,102],["S0239","Los Cinco han de resolver un enigma","Enid Blyton","Los Cinco","19","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Lomo blanco con cabecera amarilla y número",8212283,92],["S0240","Los Cinco en Billycock Hill","Enid Blyton","Los Cinco","18","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Lomo blanco con cabecera amarilla y número",null,-1],["S0241","Los Cinco juntos otra vez","Enid Blyton","Los Cinco","20","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Lomo blanco con cabecera amarilla y número",12328002,153],["S0242","Los Cinco tras el pasadizo secreto","Enid Blyton","Los Cinco","15","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Lomo blanco con cabecera amarilla y número",null,-1],["S0243","Los Cinco se divierten","Enid Blyton","Los Cinco","13","Juventud","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",15.1,"Lomo blanco con cabecera amarilla y número",null,-1],["S0244","La isla del tesoro","Geronimo Stilton","Geronimo Stilton (Grandes historias)","","Destino","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo azul claro, letras amarillas sobre banda roja; firma 'G. Stilton'",12331377,155],["S0245","Djadi, el niño refugiado","Peter Härtling","","","Lóguez","Novela juvenil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo morado; editorial deducida del logo, no leída",10494037,130],["S0246","Tales of Mystery and Imagination","Edgar Allan Poe","","","","Novela juvenil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo negro fino con cabecera rosa/roja, texto en inglés (lectura graduada); nº '95' en el lomo",1757599,5],["S0247","San Manuel Bueno, mártir","Miguel de Unamuno","","","","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo negro, logo de caballo abajo (¿Vicens Vives Clásicos Hispánicos?)",4410960,21],["S0248","Estudio en escarlata","Sir Arthur Conan Doyle","","","","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo rojo; editorial no legible (logo cuadrado abajo)",14279203,216],["S0249","El extranjero","","","","","Novela juvenil","baja","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo blanco muy fino; solo se lee 'El extranjero' abajo, autor ilegible (probablemente Albert Camus)",null,-1],["S0250","Nuevo Diccionario básico de la lengua española","","","","Santillana","Varios","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo blanco con iconos de colores, sobrecubierta rota",12333176,156],["S0251","La dama del alba","Alejandro Casona","Clásicos Hispánicos (Vicens Vives)","26","Vicens Vives","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo negro fino, nº 26 arriba",4319106,20],["S0252","La caída de los Reinos","Morgan Rhodes","La caída de los Reinos","1","SM","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo gris con estrella; se lee 'Rhodes'",7263762,41],["S0253","Kika Superbruja, detective","Knister","Kika Superbruja","","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo verde",3325386,10],["S0254","Cuentos y leyendas de los héroes de la mitología","","Cuentos y leyendas","","Anaya","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Lomo negro fino medio tapado entre Kika y Criaturas fantásticas; editorial deducida de la colección",5268866,29],["S0255","Criaturas fantásticas","Neil Gaiman","","","","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",16.3,"Tomo grueso negro con letras plateadas",3334209,16],["S0256","Diario de Sofía desde el saco de dormir","Rose Cooper","Diario de Sofía","","Alfaguara","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo naranja/rojo con bandas de colores",null,-1],["S0257","El viaje a Escocia","","","8","Macmillan","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo rojo fino con bandera británica y nº 8 arriba; serie no identificada",null,-1],["S0258","El hogar de Miss Peregrine para niños peculiares","Ransom Riggs","Miss Peregrine","1","Cross Books","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"",7245395,38],["S0259","El fantasma del picadero","Thomas Brezina","Un caso para ti y el Equipo Tigre","2","SM","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo verde azulado",12985060,167],["S0260","Alicia en el país de las maravillas","Lewis Carroll","Tus Libros (Anaya)","34","Anaya","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo crema/amarillo, nº 34 abajo; colección deducida",11165954,146],["S0261","El libro de los hechizos","Cecilia Pisos","Sopa de Libros","125","Anaya","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo naranja/blanco, nº 125 arriba, logo Anaya abajo",13638826,185],["S0262","Cuatro amigos y medio en... El caso de Papá Noel","Joachim Friedrich","Cuatro amigos y medio","155","Edebé","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo verde/negro, nº 155 (colección Tucán)",null,-1],["S0263","El pirata Garrapata","Juan Muñoz Martín","","1","","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo naranja con badge amarillo '1'; parece colección numerada (1,2,3) con diseño de ruta punteada (¿SM/El Barco de Vapor en edición coleccionable?)",12493472,161],["S0264","El ponche mágico","Michael Ende","","2","","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo azul con badge amarillo '2'; misma colección que El pirata Garrapata",10860351,142],["S0265","Fray Perico en la guerra","Juan Muñoz Martín","","3","","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo turquesa con badge amarillo '3'; misma colección",5265602,27],["S0266","El pequeño vampiro","Angela Sommer-Bodenburg","El pequeño vampiro","1","Alfaguara Infantil","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo rojo",4901886,22],["S0267","La hormiga Miga se hunde en la historia","Emili Teixidor","El Barco de Vapor","210","SM","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo naranja",6617713,31],["S0268","Devuélveme el anillo, pelo cepillo","Enrique Páez","Altamar","51","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo rosa/verde",6923029,35],["S0269","Código Lyoko: Comienza la aventura","","Código Lyoko","","","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo verde fino; editorial no legible (logo 'V' abajo)",null,-1],["S0270","La Hormiga Miga, megamaga","Emili Teixidor","El Barco de Vapor","115","SM","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo blanco",5269057,30],["S0271","El Club de las Zapatillas Rojas","Ana Punset","El Club de las Zapatillas Rojas","1","Montena","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Tomo grueso negro",7342873,70],["S0272","El héroe perdido","Rick Riordan","Los héroes del Olimpo","1","Montena","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"",13705694,189],["S0273","El hijo de Neptuno","Rick Riordan","Los héroes del Olimpo","2","Montena","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"",8612933,108],["S0274","El trono de la Luna Creciente","Saladin Ahmed","","","","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",17.75,"Lomo turquesa/dorado; título parcialmente tapado ('El Tro... Luna C...'), completado por conocimiento",13700993,188],["S0275","ilegible (lomo magenta fino)","","","","","Ilegible","baja","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",18.0,"Lomo magenta/morado fino metido entre Saladin Ahmed y los tomos de Zoé, sin texto legible",null,-1],["S0276","¡Elemental, querida Zoé!","Ana García-Siñeriz","La banda de Zoé","2","Destino","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",18.0,"Lomo amarillo con caricatura; autora deducida (ilustra Jordi Labanda)",7285035,58],["S0277","¡Esto sí que es Hollywood!","Ana García-Siñeriz","La banda de Zoé","3","Destino","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",18.0,"Lomo amarillo",7285036,59],["S0278","Zoé ♥ NY","Ana García-Siñeriz","La banda de Zoé","4","Destino","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",18.0,"Lomo amarillo; título con corazón ('Zoé ama NY')",7267778,42],["S0279","Diario de Nikki 1: Crónicas de una vida muy poco glamurosa","Rachel Renée Russell","Diario de Nikki","1","RBA","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",20.8,"",14057970,202],["S0280","Diario de Nikki 2: Cuando no eres la reina de la fiesta precisamente","Rachel Renée Russell","Diario de Nikki","2","Molino","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",20.8,"",14057968,201],["S0281","Diario de Nikki 3: Una estrella del pop muy poco brillante","Rachel Renée Russell","Diario de Nikki","3","Molino","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",20.8,"",8240300,101],["S0282","Diario de Nikki 4: Una patinadora sobre hielo algo torpe","Rachel Renée Russell","Diario de Nikki","4","RBA","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",20.8,"",null,-1],["S0283","Diario de Nikki 5: Una sabelotodo no tan lista","Rachel Renée Russell","Diario de Nikki","5","RBA","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",20.8,"",null,-1],["S0284","Diario de Nikki 6: Una rompecorazones no muy afortunada","Rachel Renée Russell","Diario de Nikki","6","RBA","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",20.8,"",9249604,116],["S0285","Diario de Nikki 7: Una famosa con poco estilo","Rachel Renée Russell","Diario de Nikki","7","RBA","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",20.8,"",7334854,69],["S0286","Diario de Nikki 8: Érase una vez una princesa algo desafortunada","Rachel Renée Russell","Diario de Nikki","8","RBA","Novela juvenil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",20.8,"",null,-1],["S0287","Bat Pat Superexploradores: En busca de la ciudad perdida","Roberto Pavanello","Bat Pat Superexploradores","1","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"",null,-1],["S0288","ilegible (1-2 libros amarillo/rojo metidos al fondo)","","","","","Ilegible","baja","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Detrás/entre Bat Pat Superexploradores y Bigote blanco hay un lomo amarillo y otro rojo empujados hacia el fondo; texto no legible",null,-1],["S0289","Bigote blanco-Bigote negro","Carmen Morales","Altamar","107","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo azul",8214768,93],["S0290","Milena Pato: La rastreadora de historias","Care Santos","Milena Pato","1","Montena","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo morado",13684677,187],["S0291","Los bebedores de tinta","Éric Sanvoisin (il. Martin Matje)","Los bebedores de tinta","1","Edelvives","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Orden físico 4,3,2,1 de izquierda a derecha",7278542,47],["S0292","Una bebida para dos","Éric Sanvoisin (il. Martin Matje)","Los bebedores de tinta","2","Edelvives","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Orden físico 4,3,2,1 de izquierda a derecha",7278543,48],["S0293","La ciudad de los bebedores de tinta","Éric Sanvoisin (il. Martin Matje)","Los bebedores de tinta","3","Edelvives","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Orden físico 4,3,2,1 de izquierda a derecha",7278544,49],["S0294","El pequeño bebedor de tinta roja","Éric Sanvoisin (il. Martin Matje)","Los bebedores de tinta","4","Edelvives","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Orden físico 4,3,2,1 de izquierda a derecha",7278545,50],["S0295","El rey de los mendigos y otros cuentos hebreos","Peninnah Schram","Cucaña","51","Vicens Vives","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo marrón oscuro, nº 51 arriba; colección deducida del logo V",null,-1],["S0296","Kika Superbruja: Todo sobre los antiguos egipcios","Knister","Kika Superbruja","3","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo amarillo/naranja con '3' abajo",9247507,115],["S0297","Kika embruja los deberes","Knister","Kika Superbruja y Dani","1","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo azul fino",7276883,46],["S0298","El vampiro del diente flojo","Knister","Kika Superbruja y Dani","3","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo rojo fino",null,-1],["S0299","El loco caballero","Knister","Kika Superbruja y Dani","4","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo verde fino",null,-1],["S0300","El dinosaurio salvaje","Knister","Kika Superbruja y Dani","5","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo amarillo fino",null,-1],["S0301","Kika Superwitch: Trouble at School","Knister","Kika Superwitch (en inglés)","1","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo rojo con bandera británica",3325388,11],["S0302","Kika Superbruja y el libro de hechizos","Knister","Kika Superbruja","0","Bruño","Infantil","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo rojo, badge con '0'",9247507,115],["S0303","El cumple de Dani","Knister","Kika Superbruja y Dani","2","Bruño","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo amarillo fino con '2' abajo; autor deducido por la serie",10288839,124],["S0304","Piano, piano","Ángel Guache","","","","Infantil","media","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Lomo rojo muy fino, nº '1' arriba; editorial no legible",13546480,177],["S0305","Avatar: The Last Airbender - The Promise, Part One","Gene Luen Yang","Avatar: The Promise","1","Dark Horse","Cómic","alta","Estantería de Sofía","4 (infantil: Bat Pat, Los Cinco, Kika Superbruja, Diario de Nikki)","IMG_3423",21.0,"Último libro de la balda, pegado a la pared derecha; autor completado por conocimiento (Nickelodeon/Dark Horse)",10109563,120],["S0306","El hada Lolita (tomo 3, título ilegible)","D. Lévy y B. Chaud","El hada Lolita","3","Edelvives","Infantil","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",28.3,"Primer libro pegado a la pared izquierda; lomo naranja con '3' arriba, título no legible por movimiento",null,-1],["S0307","El hada Lolita y la ... (título incompleto)","D. Lévy y B. Chaud","El hada Lolita","","Pearson Alhambra","Infantil","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo verde lima; solo se lee 'El hada Lolita y la ...'",7285400,60],["S0308","Lolita tiene hambre","D. Lévy y B. Chaud","El hada Lolita","1","Edelvives","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo amarillo con '1'",null,-1],["S0309","El hada Lolita hace de profesora","D. Lévy y B. Chaud","El hada Lolita","","Pearson Alhambra","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo granate",10751578,139],["S0310","El hada Lolita y las historias de amor (lectura dudosa)","D. Lévy y B. Chaud","El hada Lolita","","Pearson Alhambra","Infantil","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo rosa; se lee 'El hada Lolita y las ... de amor'",null,-1],["S0311","ilegible (lomo magenta fino, nº 2)","","","2","","Ilegible","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo magenta fino con '2' arriba; posiblemente de la misma serie infantil",null,-1],["S0312","ilegible (lomo marrón claro, letras negras estilizadas)","","","","","Ilegible","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo marrón/tostado ancho con título en tipografía decorativa; se ve un '6' abajo",null,-1],["S0313","¡Apaga la luz!","Richard Fowler","","","Bruño","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo azul oscuro/morado",12740847,165],["S0314","ilegible (lomo granate muy fino)","","","","","Ilegible","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Entre ¡Apaga la luz! y el libro a rayas; sin texto legible",null,-1],["S0315","ilegible (lomo a rayas azul claro, nº 5)","","","5","","Ilegible","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo blanco con rayas celestes, forrado con plástico, '5' arriba",null,-1],["S0316","Las trece en punto","James Stimson","","","","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Lomo negro fino, letras grises ('Thirteen O'Clock')",10122018,121],["S0317","Robinson Crusoe","Daniel Defoe","","","","Infantil","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",28.3,"Lomo oscuro fino entre Las trece en punto y el pop-up; 'Robinson Crusoe' leído con dificultad a 28,3 s; autor deducido",368541,0],["S0318","El cuerpo humano en pop-up: Sistema digestivo","Steve Alton y Nick Sharratt","","","SM","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",27.45,"Tomo grande azul; a su derecha hay una caja de cartón, un estuche/caja rosa de princesas, un reloj de sobremesa de madera y un león de juguete (no son libros)",null,-1],["S0319","Los 3 cerditos","Cyril Hahn","","","Edelvives","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",26.2,"Lomo naranja; primer libro a la derecha del reloj",10134985,122],["S0320","Fábulas de Esopo","Jerry Pinkney","","","","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",26.2,"Lomo rojo fino; editorial no legible (¿Vicens Vives?)",14031878,199],["S0321","Dinojuegos","","¡Fundamental!","18","","Varios","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",26.2,"Lomo negro muy fino con etiqueta blanca '¡Fundamental! 18' y franjas de colores abajo",null,-1],["S0322","El gran libro de los cuentos de miedo y misterio","","","","","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",26.2,"Tomo rojo grande, letras doradas; editorial ilegible",14076450,204],["S0323","Cinderella (pop-up)","Matthew Reinhart","","","Little Simon","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",26.2,"Lomo rosa ancho, en inglés",760729,1],["S0324","Secretos del anillo de las hadas","","","","Pirueta","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",26.2,"Lomo verde muy ancho (libro-caja), etiqueta amarilla",null,-1],["S0325","Érase una vez Don Quijote","Miguel de Cervantes (adaptación)","","","","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Lomo crema muy fino entre Secretos del anillo y Rita Robinson",3326536,13],["S0326","El mundo de Rita en 3D","Rita Robinson","","","Macmillan","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Lomo blanco/rojo",null,-1],["S0327","ilegible (libro alto detrás de Rita Robinson, logo rojo circular)","","","","","Ilegible","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Se ve asomar por arriba un libro alto blanco con un logo rojo redondo; lomo tapado",null,-1],["S0328","La gota de lluvia","Alfredo Gómez Cerdá","Altamar","","Bruño","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Lomo azul",7306507,65],["S0329","Peter Pan","J. M. Barrie","","","","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Lomo blanco con cabecera verde (edición escolar/adaptada)",8237052,97],["S0330","Mystery in San Francisco","Gina D. B. Clemen","Black Cat (lectura graduada en inglés)","","Vicens Vives","Novela juvenil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Lomo blanco con cabecera magenta; editorial deducida de la colección Black Cat",13190379,172],["S0331","ilegible: '... de fantasmas' (Charles Dickens)","Charles Dickens","","","","Ilegible","baja","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Lomo blanco muy fino; se lee 'Charles Dickens' y una palabra acabada en 'FANTASMAS' (¿Historias de fantasmas / Nochebuena de fantasmas?)",null,-1],["S0332","La voz de los sueños y otros cuentos prodigiosos","Hugh Lupton","Cucaña","","Vicens Vives","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Lomo granate oscuro",null,-1],["S0333","Un plan perfecto","","Mila & Luna (lectura dudosa del logo)","14","Montena","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Serie de lomos morados/magenta con logo rizado que parece 'Mila&Luna' (podría ser la edición española de 'Milla & Sugar', de Prunella Bat); nº de tomo en círculo arriba",10583324,133],["S0334","¿Bruja o hada?","","Mila & Luna (lectura dudosa del logo)","1","Montena","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Serie de lomos morados/magenta con logo rizado que parece 'Mila&Luna' (podría ser la edición española de 'Milla & Sugar', de Prunella Bat); nº de tomo en círculo arriba",null,-1],["S0335","Bruja por un día","","Mila & Luna (lectura dudosa del logo)","10","Montena","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Serie de lomos morados/magenta con logo rizado que parece 'Mila&Luna' (podría ser la edición española de 'Milla & Sugar', de Prunella Bat); nº de tomo en círculo arriba",7282888,56],["S0336","El amuleto mágico","","Mila & Luna (lectura dudosa del logo)","3","Montena","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Serie de lomos morados/magenta con logo rizado que parece 'Mila&Luna' (podría ser la edición española de 'Milla & Sugar', de Prunella Bat); nº de tomo en círculo arriba",7282881,55],["S0337","Un hechizo secreto","","Mila & Luna (lectura dudosa del logo)","2","Montena","Infantil","media","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Serie de lomos morados/magenta con logo rizado que parece 'Mila&Luna' (podría ser la edición española de 'Milla & Sugar', de Prunella Bat); nº de tomo en círculo arriba",7282880,54],["S0338","Trece fantasmas para Tenebrosa","Geronimo Stilton","Tenebrosa Tenebrax","1","Destino","Infantil","alta","Estantería de Sofía","5 (la más baja: El hada Lolita y libros desplegables)","IMG_3423",24.6,"Lomo morado, firma 'G. Stilton'; último libro de la balda antes del panel vertical",8373521,107]],"sprite":{"src":"portadas_sofia.jpg","cols":40,"w":64,"h":96},"cats":[["Novela juvenil","#b5432f"],["Literatura","#7a4b2e"],["Infantil","#c7a632"],["Cómic","#d08a2a"],["Manga","#7d3c98"],["Texto escolar","#2f5f85"],["Ensayo","#3f6f5e"],["Varios","#7d6b86"],["Ilegible","#9a9088"]],"red":{"pos":[[336,541],[696,309],[883,1804],[632,259],[1071,246],[1473,267],[566,1394],[586,1472],[771,286],[554,1574],[978,1227],[533,1736],[563,1679],[238,895],[189,814],[345,878],[123,878],[316,805],[1411,1409],[1469,1466],[174,1036],[172,962],[292,957],[241,1002],[1531,1163],[706,1648],[631,1711],[975,1319],[769,1611],[773,1673],[840,1654],[811,1566],[875,1595],[919,1645],[833,1508],[899,1536],[656,378],[681,190],[809,1814],[736,1811],[795,1450],[1014,182],[364,459],[1447,1333],[1137,197],[1377,299],[775,391],[1039,323],[407,614],[1697,913],[1068,1490],[1057,113],[1283,314],[1780,916],[1358,193],[1719,1773],[1648,1797],[91,1059],[436,893],[861,1443],[1147,317],[1326,1407],[1252,1485],[317,1332],[387,1369],[309,1395],[469,1345],[392,1307],[520,1286],[457,1286],[1323,1291],[1391,1275],[1494,997],[1848,1114],[1426,1655],[1233,1393],[1338,1732],[1348,1668],[1267,1709],[513,487],[1507,1639],[1088,1627],[1743,832],[555,299],[454,431],[1578,1584],[1751,1087],[1852,864],[1773,1003],[1702,1012],[255,766],[310,397],[1624,971],[1502,1287],[955,1502],[1942,1001],[1365,1216],[931,1445],[1228,1564],[1950,1075],[1915,927],[1580,1248],[1747,1432],[1666,1343],[1735,1361],[1676,1406],[1603,1318],[1414,1712],[1664,1580],[1489,1225],[1290,1179],[1176,1604],[1221,1326],[1202,1268],[1207,1204],[1329,1815],[1715,1537],[1682,1278],[1272,1107],[1364,1342],[1282,1251],[1807,1697],[1273,1649],[1167,1514],[1263,1789],[777,191],[1483,1733],[1366,377],[1506,408],[1450,361],[1461,478],[1392,441],[1298,488],[1375,516],[1291,415],[1324,1480],[1402,1590],[1332,1596],[1389,1475],[1299,1544],[1368,1535],[1437,1527],[1476,1576],[905,1380],[1645,1649],[952,233],[1775,1272],[1357,1134],[833,1379],[977,1393],[1164,1451],[876,1318],[430,1128],[502,1069],[1158,1387],[1393,956],[1227,1859],[1710,1693],[1440,1043],[1808,1335],[1352,1061],[945,1166],[1470,1806],[1405,1781],[716,458],[926,1271],[882,1188],[873,1244],[1193,124],[962,1099],[856,1727],[1561,1707],[503,612],[1082,1350],[1189,1764],[1637,1730],[104,1598],[574,175],[1878,1358],[1435,1129],[1406,1852],[1042,418],[1121,1236],[847,341],[1128,1844],[1626,1876],[1122,1683],[1291,1347],[954,93],[1866,1436],[436,540],[1761,1619],[1501,1088],[1560,1777],[1218,236],[1576,895],[1125,1154],[956,338],[1108,1766],[1544,1841],[1115,50],[1322,982],[1522,1917],[1825,1505],[564,382],[1570,1055],[1138,413],[1849,1033],[1099,1548],[1702,1216],[1635,1216],[1170,1097],[423,1767],[344,1587],[367,1707],[439,1692],[375,1642],[301,1525],[581,1160],[880,1117],[806,1132],[686,1271],[725,1326],[734,1387],[660,1385],[659,1326],[612,1265],[595,1328],[924,1029],[477,1415],[848,1050],[776,1070],[523,1451],[784,1741],[716,1726],[458,1487],[404,1530],[411,1443],[359,1477],[520,1515],[441,1602],[475,1555],[502,1629],[599,1793],[1034,1758],[1598,1150],[1429,1940],[1895,1546],[1652,1100],[584,584],[1132,1030],[1024,1676],[710,1577],[846,970],[1320,1926],[699,1106],[767,986],[1870,1629],[121,1519],[703,1033],[714,934],[641,1000],[695,1950],[613,1077],[606,1908],[625,923],[1032,1275],[187,1612],[552,943],[1034,1181],[1770,1173],[1095,1420],[1141,1320],[1212,992],[743,108],[760,1895],[681,1865],[839,1893],[1540,1359],[1595,1396],[1600,1456],[1603,1518],[1491,1399],[1537,1446],[1664,1479],[1534,1515],[655,1210],[799,499],[206,1523],[555,1021],[318,1769],[262,1721],[284,1657],[261,1590],[496,1134],[610,1535],[647,1649],[595,1618],[743,1524],[649,1459],[673,1517],[650,1581],[716,1465],[484,983],[50,972],[733,1181],[808,1267],[802,1201],[749,1246],[794,1325],[487,215],[851,228],[399,992],[634,477],[625,98],[425,1048],[313,1133],[294,1072],[254,1193],[211,1135],[240,482],[143,1179],[183,1249],[89,1248],[217,1320],[115,1326],[880,441],[180,1687],[92,1393],[1018,1580],[459,312],[377,1099],[454,1209],[353,1196],[397,1235],[317,1259],[518,1204],[668,1774]],"aristas":[[2,38,0],[38,39,0],[10,27,0],[14,17,0],[20,21,0],[21,22,0],[22,23,0],[20,22,0],[24,245,0],[50,208,0],[55,56,0],[58,59,0],[63,64,0],[64,65,0],[65,66,0],[66,67,0],[67,68,0],[68,69,0],[63,65,0],[66,68,0],[70,71,0],[71,119,0],[119,120,0],[120,187,0],[70,119,0],[72,158,0],[74,76,0],[76,77,0],[77,78,0],[78,122,0],[74,77,0],[75,112,0],[112,113,0],[113,114,0],[75,113,0],[79,83,0],[83,84,0],[81,186,0],[95,99,0],[101,209,0],[209,210,0],[102,103,0],[103,104,0],[104,105,0],[105,106,0],[102,104,0],[117,207,0],[207,324,0],[121,191,0],[126,162,0],[162,163,0],[163,180,0],[126,163,0],[135,136,0],[136,137,0],[137,138,0],[138,139,0],[139,140,0],[140,141,0],[141,142,0],[135,137,0],[138,140,0],[149,254,0],[152,153,0],[154,271,0],[271,272,0],[155,201,0],[170,233,0],[233,234,0],[234,243,0],[243,337,0],[170,234,0],[171,193,0],[193,199,0],[176,258,0],[221,222,0],[222,223,0],[223,224,0],[224,225,0],[225,226,0],[226,227,0],[227,286,0],[221,223,0],[224,226,0],[229,232,0],[232,235,0],[235,236,0],[236,237,0],[237,238,0],[238,239,0],[239,240,0],[240,241,0],[241,242,0],[229,235,0],[236,238,0],[239,241,0],[252,295,0],[295,296,0],[296,297,0],[297,298,0],[298,299,0],[299,300,0],[300,301,0],[301,302,0],[252,296,0],[297,299,0],[300,302,0],[262,264,0],[266,269,0],[275,276,0],[276,277,0],[278,279,0],[279,280,0],[280,281,0],[281,282,0],[282,283,0],[283,284,0],[284,285,0],[278,280,0],[281,283,0],[290,291,0],[291,292,0],[292,293,0],[290,292,0],[305,306,0],[306,307,0],[307,308,0],[308,309,0],[305,307,0],[56,218,1],[218,294,1],[294,331,1],[55,218,1],[71,187,1],[79,84,1],[86,121,1],[88,89,1],[89,99,1],[116,190,1],[190,191,1],[127,128,1],[128,129,1],[129,130,1],[130,131,1],[131,132,1],[132,133,1],[133,134,1],[127,129,1],[130,132,1],[165,166,1],[166,167,1],[167,266,1],[165,167,1],[212,213,1],[213,214,1],[214,215,1],[215,216,1],[216,217,1],[212,214,1],[215,217,1],[295,301,1],[267,288,1],[288,327,1],[299,302,1],[296,298,1],[332,333,1],[333,334,1],[334,335,1],[335,336,1],[332,334,1]],"etiquetas":[["Enid Blyton",456,1510,10],["Los Cinco",456,1510,10],["Knister",665,1547,9],["J. K. Rowling",1378,1540,8],["Roberto Pavanello",665,1312,8],["Rachel Renée Russell",1570,1445,8],["Chuletas",1392,435,8],["Harry Potter",1378,1540,8],["Diario de Nikki",1570,1445,8],["Jeff Kinney",407,1331,7],["Diario de Greg",407,1331,7],["Bat Pat",667,1326,7]],"ancho":2000,"alto":2000},"clave":"biblioteca_sofia.v1"}</script>
+<script>
+(function () {
+  'use strict';
+  const F = { id: 0, titulo: 1, autor: 2, col: 3, tomo: 4, ed: 5, cat: 6, conf: 7, mueble: 8, balda: 9, video: 10, seg: 11, notas: 12, olid: 13, sp: 14 };
+  const PAYLOAD = JSON.parse(document.getElementById('data').textContent);
+  const RAW = PAYLOAD.libros;
+  const SPRITE = PAYLOAD.sprite; // {src, cols, w, h}
+  const $ = (s) => document.querySelector(s);
+  const DEFAULT_CATS = [['Literatura', '#7a4b2e'], ['Cómic', '#b5432f'], ['Manga', '#d08a2a'], ['Infantil y juvenil', '#c7a632'], ['Ensayo y divulgación', '#3f6f5e'], ['Ciencia y técnica', '#2f5f85'], ['Fotografía', '#4a4a4a'], ['Cocina', '#8c6a3f'], ['Varios', '#7d6b86'], ['Ilegible', '#9a9088']];
+  const CATS = (PAYLOAD.cats || DEFAULT_CATS).map(c => c[0]);
+  const CATCOLOR = Object.fromEntries(PAYLOAD.cats || DEFAULT_CATS);
+  const FILTERS = [['todos', 'Todos'], ['prestados', 'Prestados'], ['revisar', 'Por revisar'], ['ilegibles', 'Ilegibles'], ['repetidos', 'Posibles repetidos'], ['corregidos', 'Corregidos'], ['anadidos', 'Añadidos a mano']];
+
+  // ---------- Estado ----------
+  const base = RAW.map((r, i) => ({
+    id: r[F.id], titulo: r[F.titulo], autor: r[F.autor] || '', col: r[F.col] || '', tomo: r[F.tomo] || '', ed: r[F.ed] || '',
+    cat: r[F.cat], conf: r[F.conf], mueble: r[F.mueble], balda: r[F.balda], video: r[F.video], seg: r[F.seg], notas: r[F.notas] || '',
+    olid: r[F.olid] || null, sp: (r[F.sp] == null ? -1 : r[F.sp]), pos: i, manual: false
+  }));
+  let extras = [], fixes = {}, loans = [];
+  let filter = 'todos', shownLimit = 120, currentId = null, view = 'list';
+
+  function norm(s) { return (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function effective(b) {
+    const f = fixes[b.id];
+    if (!f) return b;
+    return Object.assign({}, b, f.campos || {}, { revisado: !!f.revisado, corregido: !!(f.campos && Object.keys(f.campos).length), notaUsuario: f.nota || '', olid: f.portada || b.olid });
+  }
+  let cacheBooks = null, dupKeys = null;
+  function allBooks() { if (!cacheBooks) cacheBooks = base.concat(extras).map(effective); return cacheBooks; }
+  function invalidate() { cacheBooks = null; dupKeys = null; }
+  function activeLoan(id) { return loans.find(l => l.libro === id && !l.devuelto); }
+  function needsReview(b) { return !b.revisado && (b.conf === 'baja' || b.cat === 'Ilegible'); }
+  function dupKey(b) { return b.cat === 'Ilegible' ? null : norm(b.titulo).replace(/\s*\(.*?\)\s*/g, ' ').trim() + '|' + norm(b.autor).split(/[ ,]/)[0] + '|' + norm(b.tomo); }
+  function isDup(b) {
+    if (!dupKeys) { dupKeys = {}; allBooks().forEach(x => { const k = dupKey(x); if (k) dupKeys[k] = (dupKeys[k] || 0) + 1; }); }
+    const k = dupKey(b); return !!k && dupKeys[k] > 1;
+  }
+  function esc(s) { return (s == null ? '' : s).toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+  function hl(text, q) {
+    text = (text || '').toString();
+    if (!q) return esc(text);
+    const n = norm(text); let out = '', i = 0;
+    for (const w of q.split(/\s+/).filter(Boolean)) { const j = n.indexOf(w, i); if (j < 0) continue; out += esc(text.slice(i, j)) + '<em>' + esc(text.slice(j, j + w.length)) + '</em>'; i = j + w.length; }
+    return out + esc(text.slice(i));
+  }
+  function shelfName(m) { const n = m.replace('Estantería de ', ''); return n.charAt(0).toUpperCase() + n.slice(1); }
+  function baldaKey(s) { const m = /^(\d+)/.exec(s); return m ? parseInt(m[1], 10) : 99; }
+  function today() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+  function fmtDate(s) { if (!s) return '?'; const [y, m, d] = s.slice(0, 10).split('-'); return d && m ? `${d}/${m}/${y}` : s; }
+  function daysSince(s) { if (!s) return 0; return Math.max(0, Math.floor((Date.now() - new Date(s + 'T00:00:00').getTime()) / 86400000)); }
+  function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0); }
+  let toastT;
+  function toast(msg) { $('#toastHost').innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`; clearTimeout(toastT); toastT = setTimeout(() => $('#toastHost').innerHTML = '', 2800); }
+
+  // ---------- Portadas ----------
+  function coverHtml(b, cls) {
+    if (b.sp >= 0 && SPRITE) {
+      const x = (b.sp % SPRITE.cols) * SPRITE.w, y = Math.floor(b.sp / SPRITE.cols) * SPRITE.h;
+      return `<div class="cover sp ${cls || ''}" style="background-image:url('${SPRITE.src}');background-position:-${x}px -${y}px" role="img" aria-label="Portada"></div>`;
+    }
+    const col = CATCOLOR[b.cat] || '#777';
+    const init = (b.titulo || '?').replace(/^(el|la|los|las|un|una|the|a|an|le|les|o|a|os|as)\s+/i, '').trim().charAt(0).toUpperCase();
+    return `<div class="cover ph ${cls || ''}" style="background-color:${col}" aria-hidden="true">${esc(init)}</div>`;
+  }
+  function bigCoverHtml(b) {
+    let inner = coverHtml(b, '');
+    if (b.sp >= 0 && SPRITE) {
+      // En la ficha el recorte del mosaico se escala al triple
+      const k = 3; const x = (b.sp % SPRITE.cols) * SPRITE.w * k, y = Math.floor(b.sp / SPRITE.cols) * SPRITE.h * k;
+      inner = `<div class="cover sp" style="background-image:url('${SPRITE.src}');background-size:${SPRITE.cols * SPRITE.w * k}px auto;background-position:-${x}px -${y}px" role="img" aria-label="Portada"></div>`;
+    }
+    if (b.olid) return `<div class="bigcover">${inner}<img src="https://covers.openlibrary.org/b/id/${encodeURIComponent(b.olid)}-L.jpg" alt="" loading="lazy" onerror="this.remove()"></div>`;
+    return `<div class="bigcover">${inner}</div>`;
+  }
+
+  // ---------- Almacenamiento ----------
+  const store = { mode: 'none', canWrite: false, ready: false, db: null, downloads: null };
+  const LS_KEY = PAYLOAD.clave || 'biblioteca.datos.v1';
+  function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { return {}; } }
+  function lsSave(d) { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); return true; } catch (e) { return false; } }
+  function uid() { return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/-/g, '').slice(0, 20); }
+  function fromLocal() {
+    const d = lsLoad();
+    loans = Object.entries(d.prestamos || {}).map(([k, v]) => Object.assign({ _id: k }, v));
+    fixes = Object.assign({}, d.correcciones || {});
+    extras = Object.entries(d.extras || {}).map(([k, v], i) => Object.assign({ id: k, manual: true, conf: 'alta', video: '', seg: null, sp: -1, olid: null, pos: 100000 + i }, v, { notas: v.nota || '' }));
+    invalidate(); fillSelects(); renderAll();
+  }
+  function localWrite(fn) { const d = lsLoad(); d.prestamos = d.prestamos || {}; d.correcciones = d.correcciones || {}; d.extras = d.extras || {}; fn(d); if (!lsSave(d)) throw new Error('localStorage'); fromLocal(); }
+  const api = {
+    async addLoan(data) { if (store.mode === 'db') return (await store.db.collection('prestamos').add(data)).id; localWrite(d => { d.prestamos[uid()] = data; }); },
+    async updateLoan(id, patch) { if (store.mode === 'db') return store.db.doc('prestamos/' + id).update(patch); localWrite(d => { Object.assign(d.prestamos[id], patch); }); },
+    async setFix(id, doc) { if (store.mode === 'db') return store.db.doc('correcciones/' + id).set(doc); localWrite(d => { d.correcciones[id] = doc; }); },
+    async delFix(id) { if (store.mode === 'db') return store.db.doc('correcciones/' + id).delete(); localWrite(d => { delete d.correcciones[id]; }); },
+    async addExtra(data) { if (store.mode === 'db') return store.db.collection('extras').add(data); localWrite(d => { d.extras[uid()] = data; }); },
+    async updateExtra(id, patch) { if (store.mode === 'db') return store.db.doc('extras/' + id).update(patch); localWrite(d => { Object.assign(d.extras[id], patch); }); },
+    async delExtra(id) { if (store.mode === 'db') return store.db.doc('extras/' + id).delete(); localWrite(d => { delete d.extras[id]; }); },
+  };
+  function fail(e) { console.error(e); toast(e && e.code === 'quota_exceeded' ? 'No queda espacio en el almacén de datos.' : 'No se pudo guardar. Inténtalo de nuevo.'); }
+
+  // ---------- Selectores y chips ----------
+  function fillSelects() {
+    const books = allBooks();
+    const muebles = [...new Set(books.map(b => b.mueble))].sort();
+    const mSel = $('#mueble'); const keep = mSel.value;
+    mSel.innerHTML = '<option value="">Todas las estanterías</option>' + muebles.map(m => `<option value="${esc(m)}">${esc(shelfName(m))}</option>`).join('');
+    mSel.value = muebles.includes(keep) ? keep : '';
+    $('#muebles').innerHTML = muebles.map(m => `<option value="${esc(m)}">`).join('');
+    const cSel = $('#cat'); const keepC = cSel.value;
+    cSel.innerHTML = '<option value="">Todas las categorías</option>' + CATS.map(c => `<option>${c}</option>`).join('');
+    cSel.value = keepC;
+    if (!$('#n_cat').options.length) $('#n_cat').innerHTML = CATS.filter(c => c !== 'Ilegible').map(c => `<option>${c}</option>`).join('');
+    fillBaldas();
+  }
+  function fillBaldas() {
+    const m = $('#mueble').value;
+    const bSel = $('#balda'); const keep = bSel.value;
+    const baldas = [...new Set(allBooks().filter(b => !m || b.mueble === m).map(b => b.balda))].sort((a, b) => baldaKey(a) - baldaKey(b) || a.localeCompare(b));
+    bSel.innerHTML = '<option value="">Todas las baldas</option>' + baldas.map(b => `<option>${esc(b)}</option>`).join('');
+    bSel.value = baldas.includes(keep) ? keep : '';
+  }
+  function renderChips() {
+    const books = allBooks();
+    const counts = {
+      todos: books.length, prestados: loans.filter(l => !l.devuelto).length, revisar: books.filter(needsReview).length,
+      ilegibles: books.filter(b => b.cat === 'Ilegible').length, repetidos: books.filter(isDup).length,
+      corregidos: books.filter(b => b.corregido || b.revisado).length, anadidos: extras.length
+    };
+    $('#chips').innerHTML = FILTERS.map(([k, label]) => `<button class="chip" data-f="${k}" aria-pressed="${filter === k}">${label}<span class="n">${counts[k]}</span></button>`).join('');
+  }
+
+  // ---------- Filtro y lista ----------
+  function filtered() {
+    const q = norm($('#q').value.trim());
+    const words = q.split(/\s+/).filter(Boolean);
+    const m = $('#mueble').value, bd = $('#balda').value, c = $('#cat').value;
+    let out = allBooks().filter(b => {
+      if (m && b.mueble !== m) return false;
+      if (bd && b.balda !== bd) return false;
+      if (c && b.cat !== c) return false;
+      if (filter === 'prestados' && !activeLoan(b.id)) return false;
+      if (filter === 'revisar' && !needsReview(b)) return false;
+      if (filter === 'ilegibles' && b.cat !== 'Ilegible') return false;
+      if (filter === 'repetidos' && !isDup(b)) return false;
+      if (filter === 'corregidos' && !b.corregido && !b.revisado) return false;
+      if (filter === 'anadidos' && !b.manual) return false;
+      if (words.length) {
+        const hay = norm([b.titulo, b.autor, b.col, b.ed, b.tomo, b.notaUsuario].join(' '));
+        if (!words.every(w => hay.includes(w))) return false;
+      }
+      return true;
+    });
+    const o = $('#orden').value;
+    if (o === 'titulo' || filter === 'repetidos') out.sort((a, b) => norm(a.titulo).localeCompare(norm(b.titulo)) || norm(a.autor).localeCompare(norm(b.autor)));
+    else if (o === 'autor') out.sort((a, b) => (norm(a.autor) || 'zzz').localeCompare(norm(b.autor) || 'zzz') || norm(a.titulo).localeCompare(norm(b.titulo)));
+    return out;
+  }
+  function rowHtml(b, q) {
+    const loan = activeLoan(b.id);
+    const tags = [];
+    if (loan) tags.push(`<span class="tag loan">Prestado a ${esc(loan.a || 'alguien')}</span>`);
+    if (b.manual) tags.push('<span class="tag new">Añadido</span>');
+    if (b.revisado) tags.push('<span class="tag ok">Revisado</span>');
+    else if (needsReview(b)) tags.push(`<span class="tag rev">${b.cat === 'Ilegible' ? 'Ilegible' : 'Dudoso'}</span>`);
+    if (filter === 'repetidos' || (isDup(b) && !loan)) tags.push('<span class="tag dup">Repetido</span>');
+    const place = shelfName(b.mueble) + ' · balda ' + (b.balda.split(' ')[0]);
+    return `<li class="row" data-id="${esc(b.id)}" aria-current="${b.id === currentId}">
+      ${coverHtml(b)}
+      <div class="t">${hl(b.titulo, q)}${b.tomo ? ' <span class="tomo">' + esc(String(b.tomo)) + '</span>' : ''}</div>
+      <div class="a">${hl(b.autor, q)}${b.col ? (b.autor ? ' · ' : '') + hl(b.col, q) : ''}</div>
+      <div class="meta"><span class="tag cat">${esc(b.cat)}</span><span>${esc(place)}</span>${tags.join('')}</div>
+    </li>`;
+  }
+  function renderList() {
+    const q = norm($('#q').value.trim());
+    const items = filtered();
+    const slice = items.slice(0, shownLimit);
+    $('#rows').innerHTML = slice.length ? slice.map(b => rowHtml(b, q)).join('') : '<li class="empty">Ningún libro coincide con la búsqueda.</li>';
+    const total = allBooks().length;
+    $('#count').textContent = items.length === total ? `${items.length} libros` : `${items.length} de ${total} libros`;
+    $('#shown').textContent = items.length > slice.length ? `Se muestran ${slice.length}` : '';
+    $('#more').hidden = items.length <= slice.length;
+  }
+  function renderTiles() {
+    const books = allBooks();
+    const prest = loans.filter(l => !l.devuelto).length, rev = books.filter(needsReview).length;
+    $('#tiles').innerHTML = `
+      <button class="tile" data-go="todos" aria-pressed="${filter === 'todos'}"><b>${books.length}</b><span>libros</span></button>
+      <button class="tile gold" data-go="prestados" aria-pressed="${filter === 'prestados'}"><b>${prest}</b><span>prestados</span></button>
+      <button class="tile" data-go="revisar" aria-pressed="${filter === 'revisar'}"><b>${rev}</b><span>por revisar</span></button>`;
+    const withCover = books.filter(b => b.sp >= 0).length;
+    const byCat = {}; books.forEach(b => { byCat[b.cat] = (byCat[b.cat] || 0) + 1; });
+    const top = Object.entries(byCat).filter(c => c[0] !== 'Ilegible').sort((a, b) => b[1] - a[1]).slice(0, 2).map(c => `${c[1]} de ${c[0].toLowerCase()}`).join(', ');
+    $('#subtitle').textContent = `${[...new Set(books.map(b => b.mueble))].length} estanterías y ${[...new Set(books.map(b => b.mueble + '|' + b.balda))].length} baldas · ${top} · ${withCover} con portada`;
+  }
+  function renderShelves() {
+    const sec = $('#shelves'); sec.hidden = view !== 'shelves'; if (sec.hidden) return;
+    const books = allBooks(); const curM = $('#mueble').value, curB = $('#balda').value;
+    const byM = {};
+    books.forEach(b => { ((byM[b.mueble] = byM[b.mueble] || {})[b.balda] = byM[b.mueble][b.balda] || []).push(b); });
+    const legend = `<div class="legend">${CATS.map(c => `<span><i style="background:${CATCOLOR[c]}"></i>${c}</span>`).join('')}<span><i style="background:var(--gold)"></i>Prestado</span></div>`;
+    sec.innerHTML = legend + '<div class="cabinets">' + Object.keys(byM).sort().map(m => {
+      const baldas = Object.entries(byM[m]).sort((a, b) => baldaKey(a[0]) - baldaKey(b[0]) || a[0].localeCompare(b[0]));
+      const tot = baldas.reduce((s, x) => s + x[1].length, 0);
+      return `<div class="cabinet"><h3><span>${esc(shelfName(m))}</span><small>${tot} libros</small></h3>${baldas.map(([bn, list]) => `
+        <div class="balda"><div class="balda-name"><button data-m="${esc(m)}" data-b="${esc(bn)}" aria-pressed="${curM === m && curB === bn}">Balda ${esc(bn)}</button><span>${list.length}</span></div>
+        <div class="spines">${list.map(b => {
+          const h = hash(b.id); const height = 42 + (h % 23); const width = 7 + ((h >> 5) % 6);
+          const col = CATCOLOR[b.cat] || '#777'; const l = activeLoan(b.id);
+          return `<span class="slot"><button class="spine ${l ? 'loan' : ''} ${b.cat === 'Ilegible' ? 'ileg' : ''}" data-id="${esc(b.id)}" style="height:${height}px;width:${width}px;background-color:${col};filter:brightness(${0.85 + ((h >> 9) % 30) / 100})" title="${esc(b.titulo)}${b.autor ? ' · ' + esc(b.autor) : ''}" aria-label="${esc(b.titulo)}"></button></span>`;
+        }).join('')}</div></div>`).join('')}</div>`;
+    }).join('') + '</div>';
+  }
+  function renderLoans() {
+    const sec = $('#loansView'); sec.hidden = view !== 'loans'; if (sec.hidden) return;
+    const act = loans.filter(l => !l.devuelto).sort((a, b) => (a.desde || '').localeCompare(b.desde || ''));
+    const books = allBooks();
+    sec.innerHTML = act.length ? `<div class="loans">${act.map(l => {
+      const b = books.find(x => x.id === l.libro); const d = daysSince(l.desde);
+      return `<div class="loan"><div class="t">${esc(b ? b.titulo : l.titulo)}${b && b.tomo ? ' <span style="font-size:13px;color:var(--ink-2);font-family:var(--body);font-weight:400">' + esc(String(b.tomo)) + '</span>' : ''}</div>
+        <div class="d">${esc((b ? b.autor : l.autor) || '')}${(b ? b.autor : l.autor) ? ' · ' : ''}prestado a <b>${esc(l.a || 'alguien')}</b> el ${fmtDate(l.desde)} (${d === 0 ? 'hoy' : d === 1 ? 'hace 1 día' : 'hace ' + d + ' días'})${l.nota ? ' · ' + esc(l.nota) : ''}</div>
+        <div class="act"><button class="btn small" data-open="${esc(l.libro)}">Ficha</button><button class="btn small primary" data-return="${esc(l._id)}" ${store.canWrite ? '' : 'disabled'}>Devuelto</button></div></div>`;
+    }).join('')}</div>` : '<p class="empty">No tienes ningún libro prestado ahora mismo. Los préstamos se apuntan desde la ficha de cada libro.</p>';
+  }
+  function renderAll() { renderTiles(); renderChips(); renderShelves(); renderLoans(); renderNet(); renderList(); if (currentId) openPanel(currentId, true); }
+
+
+  // ---------- Red de libros ----------
+  const net = (() => {
+    const R = PAYLOAD.red || { pos: [], aristas: [], etiquetas: [], ancho: 2000, alto: 2000 };
+    const cv = $('#net'); const ctx = cv.getContext('2d'); const tip = $('#netTip');
+    let scale = 1, tx = 0, ty = 0, hover = -1, dragging = false, moved = false, last = null, pinch = null, sized = false;
+    const idx = {}; base.forEach((b, i) => { idx[b.id] = i; });
+    const catCentroid = {};
+    function nodePos(b) {
+      if (b.pos < 100000) return R.pos[b.pos];
+      if (!catCentroid[b.cat]) { const pts = base.filter(x => x.cat === b.cat).map(x => R.pos[x.pos]); const n = pts.length || 1; catCentroid[b.cat] = [pts.reduce((s, p) => s + p[0], 0) / n || R.ancho / 2, pts.reduce((s, p) => s + p[1], 0) / n || R.alto / 2]; }
+      const h = hash(b.id); return [catCentroid[b.cat][0] + (h % 120) - 60, catCentroid[b.cat][1] + ((h >> 7) % 120) - 60];
+    }
+    function cssColor(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+    function size() {
+      const r = cv.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+      if (!r.width) return false;
+      if (cv.width !== Math.round(r.width * dpr) || cv.height !== Math.round(r.height * dpr)) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
+      return true;
+    }
+    function fit() {
+      if (!size()) return; const r = cv.getBoundingClientRect();
+      scale = Math.min(r.width / R.ancho, r.height / R.alto) * 0.96;
+      tx = (r.width - R.ancho * scale) / 2; ty = (r.height - R.alto * scale) / 2; sized = true; draw();
+    }
+    function toScreen(p) { return [p[0] * scale + tx, p[1] * scale + ty]; }
+    function draw() {
+      if ($('#netView').hidden) return;
+      if (!sized) return fit();
+      if (!size()) return;
+      const dpr = window.devicePixelRatio || 1; const r = cv.getBoundingClientRect();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, r.width, r.height);
+      const books = allBooks(); const vis = new Set(filtered().map(b => b.id));
+      const dimming = vis.size !== books.length;
+      const showA = $('#netAutor').checked, showC = $('#netCol').checked, showL = $('#netLabels').checked;
+      const sel = currentId != null ? idx[currentId] : -1; const hov = hover;
+      const neigh = new Set();
+      // aristas
+      ctx.lineWidth = Math.max(0.5, 0.9 * Math.sqrt(scale));
+      const lineColor = cssColor('--ink-2');
+      ctx.strokeStyle = lineColor; ctx.globalAlpha = dimming ? 0.08 : 0.22;
+      ctx.beginPath();
+      const strong = [];
+      for (const [a, b, t] of R.aristas) {
+        if ((t === 0 && !showA) || (t === 1 && !showC)) continue;
+        if (a === sel || b === sel || a === hov || b === hov) { strong.push([a, b]); neigh.add(a); neigh.add(b); continue; }
+        if (dimming && !(vis.has(base[a].id) && vis.has(base[b].id))) continue;
+        const p = toScreen(R.pos[a]), q = toScreen(R.pos[b]);
+        ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]);
+      }
+      ctx.stroke();
+      // nodos
+      const rad = Math.max(1.6, Math.min(7, 3.2 * Math.sqrt(scale)));
+      ctx.globalAlpha = 1;
+      for (const b of books) {
+        const p = toScreen(nodePos(b)); if (p[0] < -10 || p[1] < -10 || p[0] > r.width + 10 || p[1] > r.height + 10) continue;
+        const faded = dimming && !vis.has(b.id);
+        ctx.globalAlpha = faded ? 0.12 : 1;
+        ctx.fillStyle = CATCOLOR[b.cat] || '#777';
+        ctx.beginPath(); ctx.arc(p[0], p[1], rad, 0, Math.PI * 2); ctx.fill();
+        if (activeLoan(b.id)) { ctx.strokeStyle = cssColor('--gold'); ctx.lineWidth = 2; ctx.stroke(); }
+      }
+      ctx.globalAlpha = 1;
+      // aristas del libro seleccionado o bajo el ratón
+      if (strong.length) {
+        ctx.strokeStyle = cssColor('--gold'); ctx.lineWidth = 2; ctx.beginPath();
+        for (const [a, b] of strong) { const p = toScreen(R.pos[a]), q = toScreen(R.pos[b]); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
+        ctx.stroke();
+        for (const i of neigh) { const p = toScreen(R.pos[i]); ctx.fillStyle = CATCOLOR[base[i].cat] || '#777'; ctx.beginPath(); ctx.arc(p[0], p[1], rad + 1.5, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = cssColor('--gold'); ctx.lineWidth = 1.5; ctx.stroke(); }
+      }
+      for (const i of [hov, sel]) {
+        if (i < 0 || i == null) continue; const p = toScreen(R.pos[i]);
+        ctx.beginPath(); ctx.arc(p[0], p[1], rad + 4, 0, Math.PI * 2); ctx.strokeStyle = cssColor('--gold'); ctx.lineWidth = 2.5; ctx.stroke();
+      }
+      // etiquetas de grupos, sin solaparse
+      if (showL) {
+        ctx.font = `600 ${Math.round(Math.min(15, 11 + scale * 2))}px ${cssColor('--body') || 'sans-serif'}`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        const boxes = [];
+        const lim = scale < 0.6 ? 14 : scale < 1.2 ? 40 : R.etiquetas.length;
+        for (const [name, x, y, n] of R.etiquetas.slice(0, lim)) {
+          const p = toScreen([x, y]); if (p[0] < 0 || p[1] < 0 || p[0] > r.width || p[1] > r.height) continue;
+          const w = ctx.measureText(name).width + 10, h = 18;
+          const box = [p[0] - w / 2, p[1] - 22, w, h];
+          if (boxes.some(o => !(box[0] + box[2] < o[0] || o[0] + o[2] < box[0] || box[1] + box[3] < o[1] || o[1] + o[3] < box[1]))) continue;
+          boxes.push(box);
+          ctx.fillStyle = cssColor('--paper'); ctx.globalAlpha = 0.82; ctx.fillRect(box[0], box[1], box[2], box[3]); ctx.globalAlpha = 1;
+          ctx.fillStyle = cssColor('--ink'); ctx.fillText(name, p[0], p[1] - 6);
+        }
+      }
+    }
+    function nearest(x, y) {
+      let best = -1, bd = 10 * 10; const books = allBooks();
+      for (const b of books) { const p = toScreen(nodePos(b)); const d = (p[0] - x) ** 2 + (p[1] - y) ** 2; if (d < bd) { bd = d; best = b.pos < 100000 ? b.pos : -2 - extras.indexOf(b); } }
+      return best;
+    }
+    function bookAt(i) { if (i >= 0) return base[i]; if (i <= -2) return extras[-2 - i]; return null; }
+    function zoomAt(f, cx, cy) { const ns = Math.max(0.15, Math.min(12, scale * f)); tx = cx - (cx - tx) * (ns / scale); ty = cy - (cy - ty) * (ns / scale); scale = ns; draw(); }
+    cv.addEventListener('wheel', (e) => { e.preventDefault(); const r = cv.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+    cv.addEventListener('pointerdown', (e) => { dragging = true; moved = false; last = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.classList.add('drag'); });
+    cv.addEventListener('pointermove', (e) => {
+      const r = cv.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top;
+      if (dragging && last) { const dx = e.clientX - last[0], dy = e.clientY - last[1]; if (Math.abs(dx) + Math.abs(dy) > 2) moved = true; tx += dx; ty += dy; last = [e.clientX, e.clientY]; draw(); return; }
+      const i = nearest(x, y); const b = bookAt(i);
+      if (i !== hover) { hover = i >= 0 ? i : -1; draw(); }
+      if (b) { tip.hidden = false; tip.style.left = x + 'px'; tip.style.top = y + 'px'; tip.innerHTML = `<b>${esc(b.titulo)}${b.tomo ? ' ' + esc(String(b.tomo)) : ''}</b>${esc(b.autor || '')}${b.col ? ' · ' + esc(b.col) : ''}<br><span style="opacity:.8">${esc(b.cat)} · ${esc(shelfName(b.mueble))}, balda ${esc(b.balda.split(' ')[0])}</span>`; }
+      else tip.hidden = true;
+    });
+    cv.addEventListener('pointerup', (e) => {
+      cv.classList.remove('drag'); const was = dragging; dragging = false;
+      if (was && !moved) { const r = cv.getBoundingClientRect(); const b = bookAt(nearest(e.clientX - r.left, e.clientY - r.top)); if (b) openPanel(b.id); }
+    });
+    cv.addEventListener('pointerleave', () => { tip.hidden = true; if (hover !== -1) { hover = -1; draw(); } });
+    // pellizco con dos dedos
+    cv.addEventListener('touchstart', (e) => { if (e.touches.length === 2) { pinch = { d: Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY) }; dragging = false; } }, { passive: true });
+    cv.addEventListener('touchmove', (e) => { if (e.touches.length === 2 && pinch) { e.preventDefault(); const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const r = cv.getBoundingClientRect(); zoomAt(d / pinch.d, (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top); pinch.d = d; } }, { passive: false });
+    cv.addEventListener('touchend', () => { pinch = null; });
+    $('#netIn').onclick = () => { const r = cv.getBoundingClientRect(); zoomAt(1.4, r.width / 2, r.height / 2); };
+    $('#netOut').onclick = () => { const r = cv.getBoundingClientRect(); zoomAt(1 / 1.4, r.width / 2, r.height / 2); };
+    $('#netFit').onclick = fit;
+    ['#netAutor', '#netCol', '#netLabels'].forEach(s => $(s).addEventListener('change', draw));
+    window.addEventListener('resize', () => { if (!$('#netView').hidden) fit(); });
+    function focusOn(id) {
+      const b = allBooks().find(x => x.id === id); if (!b) return;
+      requestAnimationFrame(() => { if (!size()) return; const r = cv.getBoundingClientRect(); const p = nodePos(b); scale = 3; tx = r.width / 2 - p[0] * scale; ty = r.height / 2 - p[1] * scale; sized = true; draw(); window.scrollTo({ top: $('#netView').offsetTop - 120, behavior: 'smooth' }); });
+    }
+    return { draw, fit, focusOn, reset() { sized = false; } };
+  })();
+  function renderNet() { const sec = $('#netView'); sec.hidden = view !== 'network'; if (!sec.hidden) requestAnimationFrame(() => net.draw()); }
+
+  // ---------- Ficha ----------
+  function openPanel(id, keep) {
+    const b = allBooks().find(x => x.id === id);
+    if (!b) return closePanel();
+    currentId = id;
+    const loan = activeLoan(id);
+    const hist = loans.filter(l => l.libro === id && l.devuelto).sort((a, b) => (b.desde || '').localeCompare(a.desde || ''));
+    const seg = b.seg != null && b.seg !== '' ? `${b.video}, segundo ${Math.round(b.seg)}` : (b.video || 'añadido a mano');
+    const dis = store.canWrite ? '' : 'disabled';
+    const dups = isDup(b) ? allBooks().filter(x => x.id !== b.id && dupKey(x) === dupKey(b)) : [];
+    $('#panelHost').innerHTML = `
+      <div class="backdrop" id="backdrop"></div>
+      <aside class="panel" role="dialog" aria-labelledby="pt">
+        <div class="panel-head">
+          <div><h2 id="pt">${esc(b.titulo)}${b.tomo ? ' <span style="font-weight:500;color:var(--ink-2);font-size:19px">' + esc(String(b.tomo)) + '</span>' : ''}</h2>
+            <div class="sub">${esc(b.autor || 'Autor no leído')}</div></div>
+          <button class="close" id="closeBtn" aria-label="Cerrar">×</button>
+          ${bigCoverHtml(b)}
+        </div>
+        <dl class="kv">
+          <dt>Colección</dt><dd>${esc(b.col || '')}</dd>
+          <dt>Editorial</dt><dd>${esc(b.ed || '')}</dd>
+          <dt>Categoría</dt><dd>${esc(b.cat)}</dd>
+          <dt>Dónde está</dt><dd>${esc(shelfName(b.mueble))}, balda ${esc(b.balda)}</dd>
+          <dt>Lectura</dt><dd>Confianza ${esc(b.conf || 'alta')} (${esc(seg)})${b.revisado ? ' · revisado a mano' : ''}</dd>
+          ${b.notas ? `<dt>Notas</dt><dd>${esc(b.notas)}</dd>` : ''}
+          ${dups.length ? `<dt>Repetido</dt><dd class="dup-list">Parece el mismo libro que ${dups.map(d => esc(shelfName(d.mueble)) + ', balda ' + esc(d.balda.split(' ')[0])).join('; ')}. Pueden ser ediciones distintas.</dd>` : ''}
+        </dl>
+        <section class="card ${loan ? 'loaned' : ''}">
+          <h3>Préstamo</h3>
+          ${loan ? `
+            <div>Prestado a <b>${esc(loan.a || 'alguien')}</b> desde el ${fmtDate(loan.desde)} (${daysSince(loan.desde) === 0 ? 'hoy' : daysSince(loan.desde) === 1 ? 'hace 1 día' : 'hace ' + daysSince(loan.desde) + ' días'})${loan.nota ? ' · ' + esc(loan.nota) : ''}</div>
+            <div class="actions"><button class="btn primary" id="returnBtn" ${dis}>Marcar como devuelto</button></div>
+          ` : `
+            <div class="grid2">
+              <label class="field">A quién <input id="loanTo" placeholder="Nombre" list="people" ${dis}></label>
+              <label class="field">Desde <input id="loanDate" type="date" value="${today()}" ${dis}></label>
+            </div>
+            <datalist id="people">${[...new Set(loans.map(l => l.a).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('')}</datalist>
+            <label class="field">Nota <input id="loanNote" placeholder="Opcional" ${dis}></label>
+            <div class="actions"><button class="btn primary" id="loanBtn" ${dis}>Apuntar préstamo</button></div>
+          `}
+          ${hist.length ? `<ul class="hist">${hist.map(h => `<li>Prestado a ${esc(h.a || 'alguien')}, del ${fmtDate(h.desde)} al ${fmtDate(h.devueltoEl)}</li>`).join('')}</ul>` : ''}
+        </section>
+        <section class="card">
+          <h3>Corregir la ficha</h3>
+          <div class="grid2">
+            <label class="field">Título <input id="f_titulo" value="${esc(b.titulo)}" ${dis}></label>
+            <label class="field">Autor <input id="f_autor" value="${esc(b.autor)}" ${dis}></label>
+            <label class="field">Colección <input id="f_col" value="${esc(b.col)}" ${dis}></label>
+            <label class="field">Tomo <input id="f_tomo" value="${esc(String(b.tomo))}" ${dis}></label>
+            <label class="field">Editorial <input id="f_ed" value="${esc(b.ed)}" ${dis}></label>
+            <label class="field">Categoría <select id="f_cat" ${dis}>${CATS.map(c => `<option ${c === b.cat ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
+          </div>
+          <label class="field">Nota tuya <textarea id="f_nota" ${dis}>${esc(b.manual ? b.notas : (fixes[b.id] || {}).nota || '')}</textarea></label>
+          <div class="actions">
+            <button class="btn primary" id="saveFix" ${dis}>Guardar cambios</button>
+            <button class="btn" id="revBtn" ${dis}>${b.revisado ? 'Quitar la marca de revisado' : 'Marcar como revisado'}</button>
+            ${!b.manual ? `<button class="btn" id="coverBtn" ${dis}>Buscar portada</button>` : ''}
+            <button class="btn" id="netBtn">Ver en la red</button>
+            ${b.manual ? `<button class="btn danger" id="delBtn" ${dis}>Eliminar este libro</button>` : ''}
+          </div>
+          <div class="hint">${storeHint()}</div>
+        </section>
+      </aside>`;
+    $('#backdrop').onclick = closePanel;
+    $('#closeBtn').onclick = closePanel;
+    if (!keep) $('#closeBtn').focus();
+    const g = (s) => document.getElementById(s);
+    if (g('loanBtn')) g('loanBtn').onclick = () => doLoan(b);
+    if (g('returnBtn')) g('returnBtn').onclick = () => doReturn(loan);
+    g('saveFix').onclick = () => saveFix(b);
+    g('revBtn').onclick = () => toggleReview(b);
+    if (g('coverBtn')) g('coverBtn').onclick = () => findCover(b);
+    g('netBtn').onclick = () => { closePanel(); setView('network'); net.focusOn(b.id); };
+    if (g('delBtn')) g('delBtn').onclick = () => delManual(b);
+    document.querySelectorAll('.row').forEach(r => r.setAttribute('aria-current', r.dataset.id === id));
+  }
+  function storeHint() {
+    if (!store.ready) return 'Conectando con el almacén de datos…';
+    if (store.mode === 'db') return store.canWrite ? 'Los cambios se guardan en esta página y se ven desde cualquier dispositivo.' : 'Solo lectura: no tienes permiso para guardar cambios.';
+    if (store.mode === 'local') return 'Los cambios se guardan en este navegador. Haz una copia de seguridad desde “Exportar e importar” para no perderlos.';
+    return 'No hay dónde guardar: este navegador no permite almacenar datos.';
+  }
+  function closePanel() { currentId = null; $('#panelHost').innerHTML = ''; document.querySelectorAll('.row[aria-current="true"]').forEach(r => r.setAttribute('aria-current', 'false')); }
+
+  // ---------- Escrituras ----------
+  async function doLoan(b) {
+    const a = $('#loanTo').value.trim(); if (!a) { $('#loanTo').focus(); return toast('Escribe a quién se lo prestas.'); }
+    try { await api.addLoan({ libro: b.id, titulo: b.titulo, autor: b.autor, a, desde: $('#loanDate').value || today(), nota: $('#loanNote').value.trim(), devuelto: false, creado: new Date().toISOString() }); toast(`Apuntado: prestado a ${a}.`); } catch (e) { fail(e); }
+  }
+  async function doReturn(loan) { try { await api.updateLoan(loan._id, { devuelto: true, devueltoEl: today() }); toast('Marcado como devuelto.'); } catch (e) { fail(e); } }
+  function baseValue(id, k) { const o = base.find(x => x.id === id); return o ? o[k] : ''; }
+  async function saveFix(b) {
+    const v = (el) => document.getElementById(el).value.trim();
+    const nota = v('f_nota');
+    if (b.manual) { try { await api.updateExtra(b.id, { titulo: v('f_titulo'), autor: v('f_autor'), col: v('f_col'), tomo: v('f_tomo'), ed: v('f_ed'), cat: $('#f_cat').value, nota }); toast('Guardado.'); } catch (e) { fail(e); } return; }
+    const campos = {};
+    [['titulo', 'f_titulo'], ['autor', 'f_autor'], ['col', 'f_col'], ['tomo', 'f_tomo'], ['ed', 'f_ed'], ['cat', 'f_cat']].forEach(([k, el]) => { const val = v(el); if (val !== (baseValue(b.id, k) || '').toString()) campos[k] = val; });
+    const prev = fixes[b.id] || {};
+    try {
+      if (!Object.keys(campos).length && !nota && !prev.revisado && !prev.portada) { if (prev.actualizado) await api.delFix(b.id); toast('Sin cambios respecto al catálogo.'); return; }
+      await api.setFix(b.id, Object.assign({}, prev, { campos, nota, revisado: !!prev.revisado, actualizado: new Date().toISOString() })); toast('Corrección guardada.');
+    } catch (e) { fail(e); }
+  }
+  async function toggleReview(b) {
+    const prev = fixes[b.id] || { campos: {}, nota: '' };
+    try { await api.setFix(b.id, Object.assign({}, prev, { revisado: !b.revisado, actualizado: new Date().toISOString() })); toast(b.revisado ? 'Marca quitada.' : 'Marcado como revisado.'); } catch (e) { fail(e); }
+  }
+  async function findCover(b) {
+    const t = b.titulo.replace(/\(.*?\)/g, ' ').split(/\s[·|/]\s|:\s/)[0].trim();
+    const a = (b.autor || '').split(/,| y | e |\//)[0].trim().split(' ').pop() || '';
+    toast('Buscando en Open Library…');
+    try {
+      const r = await fetch('https://openlibrary.org/search.json?' + new URLSearchParams({ title: t, author: a, limit: '5', fields: 'cover_i,language' }));
+      const docs = ((await r.json()).docs || []).filter(d => d.cover_i);
+      if (!docs.length) return toast('No hay portada en Open Library para este libro.');
+      const es = docs.find(d => (d.language || []).includes('spa')) || docs[0];
+      const prev = fixes[b.id] || { campos: {}, nota: '' };
+      await api.setFix(b.id, Object.assign({}, prev, { portada: es.cover_i, actualizado: new Date().toISOString() }));
+      toast('Portada encontrada.');
+    } catch (e) { console.error(e); toast('Desde aquí no se puede consultar Open Library. Prueba en la copia publicada en GitHub.'); }
+  }
+  async function delManual(b) { try { await api.delExtra(b.id); closePanel(); toast('Libro eliminado.'); } catch (e) { fail(e); } }
+  $('#addForm').onsubmit = async (ev) => {
+    ev.preventDefault();
+    if (!store.canWrite) return toast('No hay dónde guardar en esta copia de la página.');
+    const v = (s) => $(s).value.trim();
+    try { await api.addExtra({ titulo: v('#n_titulo'), autor: v('#n_autor'), col: v('#n_col'), tomo: v('#n_tomo'), ed: v('#n_ed'), cat: $('#n_cat').value, mueble: v('#n_mueble') || 'Sin estantería', balda: v('#n_balda') || 'sin balda', nota: '', creado: new Date().toISOString() }); $('#addForm').reset(); $('#addBox').open = false; toast('Libro añadido.'); } catch (e) { fail(e); }
+  };
+
+  // ---------- Exportar e importar ----------
+  function csvOf(books) {
+    const cols = ['id', 'titulo', 'autor', 'coleccion', 'tomo', 'editorial', 'categoria', 'confianza', 'estanteria', 'balda', 'prestado_a', 'prestado_desde', 'revisado', 'nota', 'portada_openlibrary', 'video', 'segundo', 'notas_lectura'];
+    const cell = (s) => { s = (s == null ? '' : s).toString(); return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const lines = [cols.join(',')];
+    books.forEach(b => { const l = activeLoan(b.id); lines.push([b.id, b.titulo, b.autor, b.col, b.tomo, b.ed, b.cat, b.conf, b.mueble, b.balda, l ? l.a : '', l ? l.desde : '', b.revisado ? 'sí' : '', b.notaUsuario || (b.manual ? b.notas : ''), b.olid || '', b.video, b.seg == null ? '' : b.seg, b.manual ? '' : b.notas].map(cell).join(',')); });
+    return '﻿' + lines.join('\r\n');
+  }
+  async function download(filename, text, type) {
+    const blob = new Blob([text], { type });
+    if (store.downloads) { try { await store.downloads.save({ filename, data: blob }); return; } catch (e) { if (e && e.code === 'cancelled') return; console.error(e); } }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function backupJson() {
+    return JSON.stringify({ formato: 'biblioteca-backup-1', fecha: new Date().toISOString(), prestamos: loans.map(l => { const { _id, ...r } = l; return Object.assign({ id: _id }, r); }), correcciones: fixes, extras: extras.map(x => ({ id: x.id, titulo: x.titulo, autor: x.autor, col: x.col, tomo: x.tomo, ed: x.ed, cat: x.cat, mueble: x.mueble, balda: x.balda, nota: x.notas, creado: x.creado })) }, null, 1);
+  }
+  async function importJson(file) {
+    let d; try { d = JSON.parse(await file.text()); } catch (e) { return toast('Ese archivo no es una copia de seguridad válida.'); }
+    if (!d || d.formato !== 'biblioteca-backup-1') return toast('Ese archivo no es una copia de seguridad válida.');
+    if (!store.canWrite) return toast('No hay dónde guardar en esta copia de la página.');
+    let n = 0;
+    try {
+      if (store.mode === 'db') {
+        for (const l of d.prestamos || []) { const { id, ...r } = l; await store.db.doc('prestamos/' + (id || uid())).set(r); n++; }
+        for (const [id, f] of Object.entries(d.correcciones || {})) { await store.db.doc('correcciones/' + id).set(f); n++; }
+        for (const x of d.extras || []) { const { id, ...r } = x; await store.db.doc('extras/' + (id || uid())).set(r); n++; }
+      } else {
+        localWrite(s => {
+          (d.prestamos || []).forEach(l => { const { id, ...r } = l; s.prestamos[id || uid()] = r; n++; });
+          Object.entries(d.correcciones || {}).forEach(([id, f]) => { s.correcciones[id] = f; n++; });
+          (d.extras || []).forEach(x => { const { id, ...r } = x; s.extras[id || uid()] = r; n++; });
+        });
+      }
+      toast(`Restaurados ${n} registros.`);
+    } catch (e) { fail(e); }
+  }
+  $('#btnExport').onclick = (e) => { e.stopPropagation(); const m = $('#exportMenu'); m.hidden = !m.hidden; $('#btnExport').setAttribute('aria-expanded', !m.hidden); };
+  document.addEventListener('click', (e) => { if (!e.target.closest('.menu')) { $('#exportMenu').hidden = true; $('#btnExport').setAttribute('aria-expanded', 'false'); } });
+  $('#exCsv').onclick = () => download('biblioteca_filtrada.csv', csvOf(filtered()), 'text/csv;charset=utf-8');
+  $('#exAll').onclick = () => download('biblioteca_completa.csv', csvOf(allBooks()), 'text/csv;charset=utf-8');
+  $('#exJson').onclick = () => download('biblioteca_copia_' + today() + '.json', backupJson(), 'application/json');
+  $('#imJson').onclick = () => $('#imFile').click();
+  $('#imFile').onchange = () => { if ($('#imFile').files[0]) importJson($('#imFile').files[0]); $('#imFile').value = ''; };
+
+  // ---------- Eventos ----------
+  ['#q', '#cat', '#orden', '#balda'].forEach(s => $(s).addEventListener('input', () => { shownLimit = 120; renderList(); renderShelves(); net.draw(); }));
+  $('#mueble').addEventListener('input', () => { fillBaldas(); shownLimit = 120; renderList(); renderShelves(); net.draw(); });
+  $('#chips').addEventListener('click', (e) => { const btn = e.target.closest('.chip'); if (!btn) return; setFilter(btn.dataset.f); });
+  $('#tiles').addEventListener('click', (e) => { const t = e.target.closest('.tile'); if (!t) return; setFilter(t.dataset.go); if (t.dataset.go === 'prestados') setView('loans'); });
+  function setFilter(f) { filter = f; shownLimit = 120; renderTiles(); renderChips(); renderList(); net.draw(); }
+  function setView(v) { view = view === v ? 'list' : v; $('#btnShelves').setAttribute('aria-pressed', view === 'shelves'); $('#btnLoans').setAttribute('aria-pressed', view === 'loans'); $('#btnNet').setAttribute('aria-pressed', view === 'network'); renderShelves(); renderLoans(); renderNet(); }
+  $('#btnShelves').onclick = () => setView('shelves');
+  $('#btnLoans').onclick = () => setView('loans');
+  $('#btnNet').onclick = () => setView('network');
+  $('#btnRandom').onclick = () => { const items = filtered(); if (!items.length) return; const b = items[Math.floor(Math.random() * items.length)]; openPanel(b.id); };
+  $('#shelves').addEventListener('click', (e) => {
+    const sp = e.target.closest('.spine'); if (sp) return openPanel(sp.dataset.id);
+    const b = e.target.closest('button[data-m]'); if (!b) return;
+    const same = $('#mueble').value === b.dataset.m && $('#balda').value === b.dataset.b;
+    $('#mueble').value = same ? '' : b.dataset.m; fillBaldas(); $('#balda').value = same ? '' : b.dataset.b; shownLimit = 120; renderList(); renderShelves();
+    if (!same) window.scrollTo({ top: $('#rows').offsetTop - 150, behavior: 'smooth' });
+  });
+  $('#loansView').addEventListener('click', (e) => { const o = e.target.closest('[data-open]'); if (o) return openPanel(o.dataset.open); const r = e.target.closest('[data-return]'); if (r) { const l = loans.find(x => x._id === r.dataset.return); if (l) doReturn(l); } });
+  $('#more').onclick = () => { shownLimit += 240; renderList(); };
+  $('#rows').addEventListener('click', (e) => { const li = e.target.closest('.row'); if (li && li.dataset.id) openPanel(li.dataset.id); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && currentId) return closePanel();
+    if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); $('#q').focus(); $('#q').select(); }
+  });
+
+  // ---------- Arranque ----------
+  fillSelects(); renderAll();
+  const notice = $('#notice');
+  (async () => {
+    const use = (n) => (window.claude && typeof window.claude.use === 'function') ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
+    const [db, user, downloads] = await Promise.all([use('db'), use('user'), use('downloads')]);
+    store.downloads = downloads || null;
+    if (db) {
+      store.mode = 'db'; store.db = db; store.ready = true;
+      const w = user ? await user.can('data.write').catch(() => null) : null;
+      store.canWrite = w !== false;
+      const onErr = (e) => { console.error(e); if (e && e.code !== 'unavailable') { notice.textContent = 'Se perdió la conexión con los datos guardados. Recarga la página.'; notice.hidden = false; } };
+      db.collection('prestamos').onSnapshot(s => { loans = s.docs.map(d => Object.assign({ _id: d.id }, d.data())); renderAll(); }, onErr);
+      db.collection('correcciones').onSnapshot(s => { fixes = {}; s.docs.forEach(d => { fixes[d.id] = d.data(); }); invalidate(); renderAll(); }, onErr);
+      db.collection('extras').onSnapshot(s => { extras = s.docs.map((d, i) => Object.assign({ id: d.id, manual: true, conf: 'alta', video: '', seg: null, sp: -1, olid: null, pos: 100000 + i }, d.data(), { notas: d.data().nota || '' })); invalidate(); fillSelects(); renderAll(); }, onErr);
+      if (currentId) openPanel(currentId, true);
+      return;
+    }
+    let ok = false; try { localStorage.setItem('biblioteca.test', '1'); localStorage.removeItem('biblioteca.test'); ok = true; } catch (e) { ok = false; }
+    store.mode = ok ? 'local' : 'none'; store.canWrite = ok; store.ready = true;
+    if (ok) fromLocal();
+    else { notice.textContent = 'Este navegador no permite guardar datos, así que los préstamos y las correcciones no se conservarán.'; notice.hidden = false; renderAll(); }
+  })();
+})();
+</script>
+
+</body>
+</html>
